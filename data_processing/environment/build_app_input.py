@@ -1,8 +1,12 @@
 """Per-plant daily discharge and water temperature for the app (data/app_input/environment/).
 
-  python data_processing/environment/build_app_input.py
+  python data_processing/environment/build_app_input.py              # track 1 only (current app scope)
+  python data_processing/environment/build_app_input.py --tracks 1 2 # later: add the climate scenarios
 
-Reads plant locations from data/app_input/facilities.csv (read only) and the standardized grids in
+Track 1 = operations (forecast + reanalysis to verify it); track 2 = climate scenarios. The current minimal
+app uses track 1 only; the track 2 grids stay in data/interim/ for later.
+
+Reads plant locations and Water_type from data/app_input/facilities.csv (read only) and the standardized grids in
 data/interim/*/europe_daily/. For every plant and discharge source it picks one river grid cell:
 the nearest cell on the main river, i.e. the nearest cell within SEARCH_RADIUS_KM whose mean discharge is at
 least MAIN_RIVER_SHARE of the largest mean discharge within that radius. (The strictly nearest cell is often a
@@ -13,7 +17,7 @@ plant's own discharge.
 Outputs (long tables, one row per plant, day and dataset; filter by location_id on click):
   discharge.parquet          location_id, date, dataset_id, source, scenario, track, member, forecast_run, value
   water_temperature.parquet  same columns + method, calibrated
-  plant_statistics.parquet   location_id, dataset_id, variable, month, quantile, value, n_days
+  plant_statistics.parquet   location_id, dataset_id, variable, month, quantile, value, n_days (track 2 only)
   plant_cells.csv            the grid cell used per plant and dataset, with distance and status
   sources.json               description of every dataset_id
 """
@@ -31,7 +35,7 @@ import xarray as xr
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_statistics import QUANTILES
-from common import (APP_INPUT, DISCHARGE, INTERIM, WATER_TEMPERATURE, distance_km, grid_store, horizontal_dims,
+from common import (APP_INPUT, DISCHARGE, WATER_TEMPERATURE, distance_km, grid_store, horizontal_dims,
                     lat_lon_2d, load_plants, water_store)
 
 OUT = APP_INPUT / "environment"
@@ -39,7 +43,6 @@ SEARCH_RADIUS_KM = 10
 EXTENDED_RADIUS_KM = 20  # used when the 10 km search finds only a small stream (model river displaced)
 MIN_RIVER_DISCHARGE = 10.0  # m3/s; below this the cell is flagged as a small stream
 MAIN_RIVER_SHARE = 0.5
-JRC_UNITS = INTERIM / "jrc_open_power_plants" / "Nuclear_commissioned.csv"  # read only: cooling water type
 
 
 def latest_store(dataset_id):
@@ -49,16 +52,6 @@ def latest_store(dataset_id):
         return runs[-1] if runs else None
     store = grid_store(dataset_id, spec)
     return store if store.exists() else None
-
-
-def cooling_water(plants):
-    """Freshwater / Seawater per plant from the nearest JRC unit within 5 km (read only), else 'unknown'."""
-    jrc = pd.read_csv(JRC_UNITS) if JRC_UNITS.exists() else pd.DataFrame(columns=["lat", "lon", "water_type"])
-    result = {}
-    for plant in plants.itertuples():
-        d = distance_km(jrc["lat"].to_numpy(float), jrc["lon"].to_numpy(float), plant.lat, plant.lon)
-        result[plant.location_id] = jrc["water_type"].iloc[int(np.argmin(d))] if len(d) and d.min() <= 5 else "unknown"
-    return result
 
 
 def mean_discharge_map(stores):
@@ -128,12 +121,13 @@ def monthly_quantiles(frame, variable):
     return q.merge(n, on=["location_id", "dataset_id", "month"]).assign(variable=variable)
 
 
-def main():
+def main(tracks=(1,)):
     plants = load_plants()
     discharge_rows, water_rows, cells, sources = [], [], [], {}
     wt_for = {pair["discharge"]: wt_id for wt_id, pair in WATER_TEMPERATURE.items()}
-    water_type = cooling_water(plants)
-    stores = {d: latest_store(d) for d in DISCHARGE}
+    water_type = dict(zip(plants["location_id"], plants["water_type"]))
+    datasets = {d: spec for d, spec in DISCHARGE.items() if spec["track"] in tracks}
+    stores = {d: latest_store(d) for d in datasets}
 
     # 1. One river cell per model (source) and plant, shared by all its scenarios and the forecast.
     by_source = {}
@@ -162,7 +156,7 @@ def main():
         print(f"{source}: river cells {counts} (mean discharge over {len(source_stores)} dataset(s))")
 
     # 2. Daily series at those cells for every dataset.
-    for dataset_id, spec in DISCHARGE.items():
+    for dataset_id, spec in datasets.items():
         store = stores[dataset_id]
         if store is None:
             print(f"{dataset_id}: no grid, skipped (run build_grids.py)")
@@ -210,12 +204,17 @@ def main():
         frame.sort_values(["location_id", "dataset_id", "member", "date"], inplace=True)
     discharge.to_parquet(OUT / "discharge.parquet", index=False)
     water.to_parquet(OUT / "water_temperature.parquet", index=False)
-    stats = pd.concat([monthly_quantiles(discharge, "discharge"), monthly_quantiles(water, "water_temperature")],
-                      ignore_index=True)
-    stats[["location_id", "dataset_id", "variable", "month", "quantile", "value", "n_days"]].to_parquet(
-        OUT / "plant_statistics.parquet", index=False)
+    stats_path = OUT / "plant_statistics.parquet"
+    if 2 in tracks:  # climate statistics belong to the planning track
+        stats = pd.concat([monthly_quantiles(discharge, "discharge"),
+                           monthly_quantiles(water, "water_temperature")], ignore_index=True)
+        stats[["location_id", "dataset_id", "variable", "month", "quantile", "value", "n_days"]].to_parquet(
+            stats_path, index=False)
+    else:
+        stats = pd.DataFrame()
+        stats_path.unlink(missing_ok=True)  # stale output of an earlier run with track 2
     pd.DataFrame(cells).to_csv(OUT / "plant_cells.csv", index=False)
-    meta = {"created": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    meta = {"created": datetime.now(timezone.utc).isoformat(timespec="seconds"), "tracks": list(tracks),
             "plants": str(Path("data/app_input/facilities.csv")),
             "cell_selection": (
                 f"nearest cell within {SEARCH_RADIUS_KM} km with mean discharge >= {MAIN_RIVER_SHARE:.0%} of the "
@@ -224,7 +223,7 @@ def main():
                 f"otherwise status small_stream."),
             "status_values": {
                 "ok": "main river within the normal search radius",
-                "sea_cooled": "plant cools with sea or estuary water (JRC water_type); the river values are "
+                "sea_cooled": "plant cools with sea or estuary water (facilities.csv Water_type); river values are "
                               "for reference only",
                 "extended_search": f"river found only within {EXTENDED_RADIUS_KM} km (model river displaced)",
                 "small_stream": f"no river >= {MIN_RIVER_DISCHARGE:g} m3/s nearby: sea-, lake- or reservoir-cooled "
@@ -237,4 +236,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--tracks", type=int, nargs="+", default=[1], choices=[1, 2])
+    main(tuple(parser.parse_args().tracks))

@@ -1,6 +1,6 @@
 # Environmental data pipeline
 
-Turns the downloads from `../river_discharge/` and `../air_temperature/` into one standard format: daily river discharge and water temperature, Europe-wide and at every plant. Plant data is only *read* (`data/app_input/facilities.csv`, and the JRC `water_type`).
+Turns the downloads from `../river_discharge/` and `../air_temperature/` into one standard format: daily river discharge and water temperature, Europe-wide and at every plant. Plant data is only *read* (locations and `Water_type` from `data/app_input/facilities.csv`).
 
 ```bash
 python data_processing/environment/build_all.py      # after new downloads; ~5 min for the current samples
@@ -11,7 +11,7 @@ python data_processing/environment/build_all.py      # after new downloads; ~5 m
 | `build_grids.py` | `data/interim/<source>/europe_daily/<scenario>.zarr` (forecasts: `forecast_<run>.zarr`) | Standard grids of `discharge` (m³/s) and `air_temperature` (°C) |
 | `water_temperature.py` | `data/interim/water_temperature/europe_daily/<scenario>.zarr` | `water_temperature` (°C) on each discharge grid |
 | `build_statistics.py` | `data/interim/<source>/statistics/<scenario>.zarr` | Monthly quantiles per grid cell (climate track, planning mode) |
-| `build_app_input.py` | `data/app_input/environment/` | Per-plant tables for the app (see the README there) |
+| `build_app_input.py` | `data/app_input/environment/` | Per-plant tables for the app (see the README there). Track 1 only by default; `--tracks 1 2` adds the climate scenarios and `plant_statistics.parquet` |
 
 ## Grid conventions (all Zarr stores)
 

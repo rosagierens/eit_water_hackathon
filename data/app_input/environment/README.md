@@ -1,8 +1,10 @@
 # Environmental data for the app
 
-Daily river discharge and river water temperature at every plant in `../facilities.csv`, for every downloaded data source. Built by `data_processing/environment/build_all.py`. Do not edit these files by hand.
+Daily river discharge and river water temperature at every plant in `../facilities.csv` (35 freshwater-cooled plants). Built by `data_processing/environment/build_all.py`. Do not edit these files by hand.
 
-**Typical use:** load the tables once at startup (about 0.1 s), then filter by `location_id` when a plant is clicked (about 10 ms). A filtered read straight from disk is just as fast: `pd.read_parquet(path, filters=[("location_id", "==", id)])`.
+**Current scope: track 1 (operations).** The tables hold the latest **forecast**, plus the **reanalysis**, the recent past used to verify the forecast. Climate scenarios (track 2) are left out for now. Their Europe-wide grids are kept in `data/interim/` and can be added with `build_app_input.py --tracks 1 2`, which also writes `plant_statistics.parquet`.
+
+**Typical use:** load the tables once (well under a second), then filter by `location_id` when a plant is clicked (about 10 ms). A filtered read straight from disk is just as fast: `pd.read_parquet(path, filters=[("location_id", "==", id)])`.
 
 ## Files
 
@@ -10,45 +12,46 @@ Daily river discharge and river water temperature at every plant in `../faciliti
 | --- | --- |
 | `discharge.parquet` | Daily river discharge (m³/s) |
 | `water_temperature.parquet` | Daily river water temperature (°C) at the same river cell |
-| `plant_statistics.parquet` | Monthly quantiles of the daily values per plant and dataset (climate track) |
-| `plant_cells.csv` | Which grid cell was used per plant and model, and how trustworthy it is (`status`) |
-| `sources.json` | Description of every `dataset_id`: label, track, scenario, period, units, method |
+| `plant_cells.csv` | The river grid cell used per plant, and how trustworthy it is (`status`) |
+| `sources.json` | Description of every `dataset_id`: label, period, units, method, `status_values` |
+
+Datasets at the moment:
+
+| `dataset_id` | Variable | What it is |
+| --- | --- | --- |
+| `glofas_forecast` | discharge | GloFAS forecast, next ~10 days (`forecast_run` = issue date) |
+| `wt_forecast` | water temperature | From GloFAS forecast + ECMWF HRES air temperature |
+| `glofas_reanalysis` | discharge | GloFAS reanalysis (ERA5-driven), past period |
+| `wt_reanalysis` | water temperature | From GloFAS reanalysis + ERA5-Land air temperature |
 
 ### `discharge.parquet` and `water_temperature.parquet` (long format, one row per plant, day, dataset, member)
 
 | Column | Meaning |
 | --- | --- |
-| `location_id` | Plant id, as in `facilities.csv` |
+| `location_id` | Plant id, as in `facilities.csv` (`Location_ID`) |
 | `date` | Calendar day (UTC) the daily mean describes |
-| `dataset_id` | e.g. `glofas_reanalysis`, `c3s_rcp_4_5`, `wt_rcp_4_5` (see `sources.json`) |
-| `source` | Model behind the value: `glofas`, `hydroland`, `c3s_hydrology` |
-| `scenario` | `forecast`, `reanalysis`, `hist`, `historical`, `SSP3-7.0`, `rcp_2_6`, `rcp_4_5`, `rcp_8_5` |
-| `track` | 1 = operations (forecast + past for verification), 2 = planning (climate scenarios) |
+| `dataset_id` | See the table above |
+| `source`, `scenario`, `track` | `glofas`; `forecast` or `reanalysis`; `1` |
 | `member` | Ensemble member (0 = control / single run) |
-| `forecast_run` | Forecast issue date; empty for non-forecasts |
+| `forecast_run` | Forecast issue date; empty for the reanalysis |
 | `value` | m³/s (discharge) or °C (water temperature) |
 | `method`, `calibrated` | Water temperature only: how it was derived; `calibrated = false` for now |
 
-### `plant_statistics.parquet`
+### `plant_cells.csv`: check `status` before showing data
 
-`location_id, dataset_id, variable, month, quantile, value, n_days`. These are quantiles (0.01 … 0.99) of the daily values in each calendar month. **Chance of exceeding a limit L** in a month ≈ 1 − (the quantile level at which `value` crosses L), found by interpolating between the quantile rows. `n_days` shows how many days the numbers are based on.
-
-### `plant_cells.csv` — check `status` before showing data
+One row per plant: the GloFAS grid cell (`row`, `col`, `cell_lat`, `cell_lon`), its `distance_km` from the plant, its `mean_discharge`, `cooling_water` (from `Water_type` in `facilities.csv`; `unknown` where that is empty) and `status`:
 
 | `status` | Meaning for the app |
 | --- | --- |
 | `ok` | Main river near the plant |
-| `extended_search` | River found only within 20 km (the model's river runs further from the plant) |
-| `small_stream` | No river ≥ 10 m³/s nearby in this model. Show with a warning or hide. |
-| `sea_cooled` | The plant cools with sea or estuary water (JRC). River values are for reference only. |
+| `extended_search` | River found only within 20 km (the model's river runs further from the plant), e.g. Cernavodă |
+| `small_stream` | No river ≥ 10 m³/s nearby in this model. Show with a warning or hide. Currently Dukovany, Mochovce, Cofrentes, Trillo, Khmelnitski. |
+| `sea_cooled` | Not used now (`facilities.csv` excludes sea-cooled plants) |
 
-The cell is chosen once per model and used for all its scenarios and the forecast, so scenarios are directly comparable. `cooling_water` comes from the JRC plant table (`unknown` = not in JRC).
+The same cell is used for the forecast and the reanalysis, so they are directly comparable.
 
 ## Caveats (current sample data)
 
 - **Water temperature is uncalibrated** (`method = air2stream-4p-uncalibrated-v0`): expect peaks a few °C too low. See `methodology_water_temperature.md`.
-- **Short periods:** each scenario currently covers only 1 month to 1 year, so the statistics are placeholders. The format stays the same when longer periods are downloaded.
-- **HydroLand has discharge only.** Its matching air temperature (Climate DT) has only 00 UTC values so far.
-- **Not covered by any model:** Trillo (upper Tagus) and Dukovany (reservoir) are `small_stream` in all models.
-
-For new locations (planning mode), use the gridded data in `data/interim/<source>/europe_daily/` and `.../statistics/` (see `data_processing/environment/README.md`).
+- **The water temperature forecast starts in equilibrium** with the first forecast week, because no observed water temperature is used yet. It covers the days where the GloFAS and ECMWF forecasts overlap (9 days now).
+- **The reanalysis is a sample:** July–August 2022 only. Rerun the pipeline after downloading more months.

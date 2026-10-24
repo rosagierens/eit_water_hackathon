@@ -96,7 +96,11 @@ def distance_km(lat, lon, plat, plon):
 
 
 def load_plants():
-    """Plant locations from the plant data (read only): location_id, name, lat, lon."""
+    """Plant locations from the plant data (read only): location_id, name, lat, lon, water_type."""
     plants = pd.read_csv(FACILITIES)
-    return plants.rename(columns={"Location_ID": "location_id", "Name": "name", "Lat": "lat", "Lon": "lon"})[
-        ["location_id", "name", "lat", "lon"]]
+    plants = plants.rename(columns={"Location_ID": "location_id", "Name": "name", "Lat": "lat", "Lon": "lon",
+                                    "Water_type": "water_type"})
+    if "water_type" not in plants:
+        plants["water_type"] = None
+    plants["water_type"] = plants["water_type"].fillna("unknown")  # no cooling data (e.g. Ukraine, Belarus)
+    return plants[["location_id", "name", "lat", "lon", "water_type"]]
