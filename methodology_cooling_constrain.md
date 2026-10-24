@@ -17,7 +17,7 @@ We compare the amount of the plant’s cooling need that the river needs to abso
 
 ## Cooling need
 
-A power plant converts input energy to electricty and wasted heat. The energy balance equation for a thermal power plant can be written as
+A power plant converts input energy to electricity and wasted heat. The energy balance equation for a thermal power plant can be written as
 
 \[
 P_{\mathrm{th}} = P_{\mathrm{el}} + Q_{\mathrm{cool}} + Q_{\mathrm{stack}} + Q_{\mathrm{other}}
@@ -28,7 +28,7 @@ where
 | Term | Meaning | Units |
 | --- | --- | --- |
 | \(P_{\mathrm{th}}\) | Thermal input from fuel or reactor | \(\mathrm{MW_{th}}\) |
-| \(P_{\mathrm{el,gross}}\) | Gross electrical output | \(\mathrm{MW_{el}}\) |
+| \(P_{\mathrm{el}}\) | Gross electrical output (capacity) | \(\mathrm{MW_{el}}\) |
 | \(Q_{\mathrm{cool}}\) | Heat taken away by the cooling system | \(\mathrm{MW_{th}}\) |
 | \(Q_{\mathrm{stack}}\) | Heat lost through the exhaust stack | \(\mathrm{MW_{th}}\) |
 | \(Q_{\mathrm{other}}\) | Small losses: heat escaping from pipes, buildings, generator, transformers | \(\mathrm{MW_{th}}\) |
@@ -103,11 +103,35 @@ Q_{\mathrm{heat,max}} = \rho \, c_p \, Q_{\mathrm{river}} \, (T_{\mathrm{limit}}
 | \(T_{\mathrm{river}}\) | River water temperature upstream of the plant | \(^\circ\mathrm{C}\) | |
 | \(\Delta T = T_{\mathrm{limit}} - T_{\mathrm{river}}\) | Remaining temperature rise the river can take before hitting the limit | \(^\circ\mathrm{C}\) | Some regulations also cap \(\Delta T\) itself (maximum warming of the river by the plant), not only the absolute downstream temperature. (from Claude, unverified.) |
 
+## Curtailment
+
+The first version uses four simplifying assumptions:
+
+1. **One facility, one plant.** Each facility is treated as a single plant with \(\alpha_{\mathrm{facility}}\), so all its units cut output by the same share.
+2. **Heat scales with output.** Efficiency is constant, so at a share \(f\) of full output the heat reaching the river is \(f\) times its full-output value.
+3. **Full mixing.** The plant's warm water mixes completely with the whole river flow.
+4. **Only the river heat limit counts.** Other limits, such as water for tower make-up or the intake temperature, are ignored.
+
+The share of its capacity the facility can use is
+
+\[
+f = \min\left(1,\ \frac{\max(0,\ Q_{\mathrm{heat,max}})}{Q_{\mathrm{river,cooling}}}\right)
+\]
+
+where \(Q_{\mathrm{river,cooling}}\) is the facility's heat to the river at full output and \(Q_{\mathrm{heat,max}}\) is converted to \(\mathrm{MW_{th}}\). The \(\max(0, \cdot)\) covers a river that is already warmer than \(T_{\mathrm{limit}}\): the plant can then put no heat into it. Available output and curtailment are
+
+\[
+P_{\mathrm{el,available}} = f \, P_{\mathrm{el}}, \qquad P_{\mathrm{el,curtailed}} = (1 - f) \, P_{\mathrm{el}}
+\]
+
+with \(P_{\mathrm{el}}\) the facility's total capacity.
+
+
 ## Data sources
 
 | Parameter | Data source | Variable in data source |
 | --- | --- | --- | 
-| location | GEM Global Nuclear Power Tracker | lat, lon |
+| location | GEM Global Nuclear Power Tracker | Latitude, Longitude |
 | \(P_{\mathrm{th}}\) | GEM Global Nuclear Power Tracker | Thermal Capacity (MWt)
 | \(P_{\mathrm{el}}\) | GEM Global Nuclear Power Tracker | Capacity (MW)
 | cooling type | JRC Open Power Plants Database | cooling_type (per generator, combined per reactor)
