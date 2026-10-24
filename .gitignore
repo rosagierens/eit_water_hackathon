@@ -218,3 +218,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Downloaded raw data (reproducible via download scripts)
+data_in/environmental_variables/*/raw/

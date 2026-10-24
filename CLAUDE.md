@@ -17,7 +17,8 @@ Keep both tracks on a shared core: one plant dataset, one set of environmental-v
 
 - `data_in/` holds raw source data **as accessed**, plus notes, citations, and the scripts that do the first cleaning steps. See `README.md`.
   - `data_in/nucler_plants/` contains the Global Nuclear Power Tracker (GEM, Aug 2026, CC BY 4.0) at unit level. `notes.txt` lists the relevant columns (coordinates, capacities, GEM location ID). Filter to `Status == "operating"` and `Region == "Europe"`.
-  - `data_in/environmental_variables/` is for meteorological and hydrological inputs (temperature, river discharge, water temperature). It is empty so far.
+  - `data_in/environmental_variables/` is for meteorological and hydrological inputs (temperature, river discharge, water temperature).
+    - `river_discharge/` has two download scripts. `download_river_discharge.py` has three subcommands: `forecast` (GloFAS forecast), `historical` (GloFAS reanalysis, used for verification) and `projection` (C3S EURO-CORDEX hydrology projections, used for scenario spread, the period after 2050 and water temperature). `download_hydroland.py` gets the main projection source: DestinE Climate DT HydroLand discharge (`Qrouted`, 1990-2049) from the DestinE Data Lake, which needs a DESP login. `readme.txt` explains why each dataset was chosen and how to access it. Downloads go to `raw/`, which git ignores.
 - `data_cleaned/` holds processed outputs that the analysis and the app can use directly. Every file here must be reproducible from `data_in/` by a script.
 
 ## Conventions
