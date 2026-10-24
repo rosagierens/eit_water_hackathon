@@ -2,18 +2,19 @@
 
 from functools import lru_cache
 from pathlib import Path
-
+from ..helper import get_path
 import pandas as pd
-
-REPO = Path(__file__).resolve().parents[2]
-FACILITIES_CSV = REPO / "data" / "app_input" / "facilities.csv"
 
 
 @lru_cache
 def load_plants():
-    if not FACILITIES_CSV.exists():
-        raise FileNotFoundError(f"{FACILITIES_CSV} missing; run data_processing/plants/run_pipeline.py")
-    plants = pd.read_csv(FACILITIES_CSV).rename(columns={
+    facilities_csv = get_path("FACILITIES_CSV")
+
+    if not facilities_csv.exists():
+        raise FileNotFoundError(
+            f"{facilities_csv} missing"
+        )
+    plants = pd.read_csv(facilities_csv).rename(columns={
         "Location_ID": "id",
         "Name": "name",
         "Country": "country",
