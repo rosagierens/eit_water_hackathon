@@ -9,7 +9,7 @@ Run: python data_in/src/pp_data_processing/process_plants.py
 
 Source: nucler_plants/Global-Nuclear-Power-Tracker-August-2026.xlsx, sheet "Data".
 
-- Filter to Status "operating" and Region "Europe".
+- Filter to Status "operating" and Region "Europe", excluding Country/Area "Russia".
 - Keep all GEM columns; no rename.
 
 Saved as nucler_plants/Operating_Europe.csv.

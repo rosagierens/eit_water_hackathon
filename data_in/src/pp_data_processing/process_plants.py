@@ -22,7 +22,11 @@ def load_gem_units(path: Path) -> pd.DataFrame:
 
 
 def filter_operating_europe(df: pd.DataFrame) -> pd.DataFrame:
-    return df.loc[(df["Status"] == "operating") & (df["Region"] == "Europe")].copy()
+    return df.loc[
+        (df["Status"] == "operating")
+        & (df["Region"] == "Europe")
+        & (df["Country/Area"] != "Russia")
+    ].copy()
 
 
 def build_facilities(units: pd.DataFrame) -> pd.DataFrame:

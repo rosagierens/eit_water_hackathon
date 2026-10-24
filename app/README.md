@@ -33,7 +33,7 @@ On a 5 km grid the nearest cell is often a small side stream. `core/discharge.py
 ## Known limits
 
 - The file reader finds variable and coordinate names by trying common options. It was tested on synthetic files shaped like GloFAS, HydroLand and C3S output, not yet on the real downloads. If a real file doesn't load, check the names in `DISCHARGE_VARS`, `LAT_NAMES` and `TIME_NAMES`.
-- Balakovo, Beloyarsk and Akademik Lomonosov (Russia) are outside the downloaded Europe box (east of 45°E) and show no data.
+- Russian units are excluded from the GEM plant data during processing.
 - Series are read from the NetCDF files on every request. That's fine for sample data, but for full datasets, pre-extract plant time series into `data_cleaned/`.
 
 ## Basemap
