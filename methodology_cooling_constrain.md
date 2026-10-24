@@ -90,8 +90,10 @@ JRC lists turbogenerators rather than reactors, and some reactors have two. Thei
 We calculate the river heat absorption capacity following the equation for energy balance of a flowing fluid (Ptak et al., 2026):
 
 \[
-Q_{\mathrm{heat,max}} = \rho \, c_p \, Q_{\mathrm{river}} \, (T_{\mathrm{limit}} - T_{\mathrm{river}})
+Q_{\mathrm{heat,max}} = \rho \, c_p \, Q_{\mathrm{river}} \, \min\left(T_{\mathrm{limit}} - T_{\mathrm{river}},\ \Delta T_{\mathrm{limit}}\right)
 \]
+
+Permits can cap the absolute downstream temperature (\(T_{\mathrm{limit}}\)), the warming caused by the plant (\(\Delta T_{\mathrm{limit}}\)), or both. The smaller of the two allowed rises applies. If a plant has only one of the two limits, only that term is used.
 
 | Symbol | Meaning | Units | Additional information |
 | --- | --- | --- | --- |
@@ -99,9 +101,10 @@ Q_{\mathrm{heat,max}} = \rho \, c_p \, Q_{\mathrm{river}} \, (T_{\mathrm{limit}}
 | \(\rho\) | Density of water | \(\mathrm{kg/m^3}\) | 1000 (constant) |
 | \(c_p\) | Specific heat capacity of water | \(\mathrm{J/(kg \cdot K)}\) | 4186 (constant) |
 | \(Q_{\mathrm{river}}\) | River discharge (volume flow) upstream of the plant | \(\mathrm{m^3/s}\) |  |
-| \(T_{\mathrm{limit}}\) | Highest downstream water temperature allowed by the plant’s permit | \(^\circ\mathrm{C}\) | Plant- or country-specific, often 25–28 \(^\circ\mathrm{C}\) in Europe. (from Claude, unverified.) |
+| \(T_{\mathrm{limit}}\) | Highest downstream water temperature allowed by the plant’s permit | \(^\circ\mathrm{C}\) | Plant-specific, from `data/raw/project_parameters/temperature_limits.csv`. Empty when no source was found. |
 | \(T_{\mathrm{river}}\) | River water temperature upstream of the plant | \(^\circ\mathrm{C}\) | |
-| \(\Delta T = T_{\mathrm{limit}} - T_{\mathrm{river}}\) | Remaining temperature rise the river can take before hitting the limit | \(^\circ\mathrm{C}\) | Some regulations also cap \(\Delta T\) itself (maximum warming of the river by the plant), not only the absolute downstream temperature. (from Claude, unverified.) |
+| \(T_{\mathrm{limit}} - T_{\mathrm{river}}\) | Remaining temperature rise the river can take before hitting the absolute limit | \(^\circ\mathrm{C}\) | |
+| \(\Delta T_{\mathrm{limit}}\) | Highest warming of the river by the plant (downstream minus upstream) allowed by the permit | \(^\circ\mathrm{C}\) | Plant-specific, from `data/raw/project_parameters/temperature_limits.csv`. Empty when no source was found. |
 
 ## Curtailment
 
@@ -138,8 +141,32 @@ with \(P_{\mathrm{el}}\) the facility's total capacity.
 | \(\alpha\) | Project assumption, `data/raw/project_parameters/cooling_type_alpha.csv` | alpha (by cooling_type, Table 1)
 | \(Q_{\mathrm{river}}\) | | 
 | \(T_{\mathrm{river}}\) | | 
-| \(T_{\mathrm{limit}}\) | |
-| \(\Delta T_{\mathrm{limit}}\) | |
+| \(T_{\mathrm{limit}}\) | Plant permits, national rules or the EU Freshwater Fish Directive, collected by hand in `data/raw/project_parameters/temperature_limits.csv` | T_max_downstream_C
+| \(\Delta T_{\mathrm{limit}}\) | As for \(T_{\mathrm{limit}}\) | dT_max_C
+
+## Temperature limits
+
+Europe has no dataset of permit limits, so they are collected by hand (carried out by Claude, unverified), one row per plant (and per season where the permit differs by season), in `data/raw/project_parameters/temperature_limits.csv`. Each value comes from the most specific source found:
+
+1. **permit**: the plant's own permit or regulator decision, or a document that quotes it (environmental impact assessment, operator or regulator report).
+2. **national_rule**: a national rule for thermal discharges into that river.
+3. **missing**: no source found. The limits stay empty.
+
+Every row cites its source, so values can be checked and replaced when a better source turns up. Each value comes from the most specific tier that sets it.
+
+Some permits do not fit the equation above as written:
+
+- **Only one of the two limits.** The four Loire plants have only \(\Delta T_{\mathrm{limit}}\) (1 °C), and Paks and Bohunice only \(T_{\mathrm{limit}}\). Only the term that exists is used.
+- **Only an outfall limit.** These plants are not covered by the app; see below.
+- **Conditional rules.** Some limits change with upstream temperature or flow. Examples: Cattenom allows no warming above 28 °C upstream; Civaux allows none above 25 °C; the Loire plants allow 1.5 °C at low flow and cool water; Tricastin allows 6 °C below 480 m³/s. These rules are in the notes of `temperature_limits.csv`, and the facility table carries only the base values.
+
+### Plants not covered: outfall limits
+
+Some permits cap the temperature of the water the plant discharges (the outfall), measured before it mixes into the river. The app does not model outfall limits. Plants whose only limit is on the outfall are not covered. Plants with both a river limit and an outfall limit are covered through the river limit only.
+
+The outfall values collected are stored in `T_max_outfall_C` in `temperature_limits.csv` but not used in the application.
+
+Why the river equation does not apply: an outfall limit is reached when the intake water plus the condenser warming exceeds the cap. The flow that matters is the plant's own cooling-water flow, not the river discharge. The outfall of tower plants and cooling reservoirs depends on the tower or reservoir heat balance instead, which needs a separate model.
 
 ## Citations
 
