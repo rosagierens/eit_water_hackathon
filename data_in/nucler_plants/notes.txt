@@ -1,0 +1,18 @@
+## Info
+Data is provided on unit level.
+
+For each unit, probably relevant data is (copied from data file): 
+- Project Name: Commonly used name
+- Latitude: decimal degrees; Latitude, assumed WGS84 (google maps)
+- Longitude: decimal degrees; Latitude, assumed WGS84 (google maps)
+- Capacity (MW): Nameplate capacity, or best available data, of the unit in megawatts
+- Reference Net Capacity (MW): Net capacity of the unit for the reference period
+- Design Net Capacity (MW): Net capacity of the unit as originally designed by the manufacturer
+- Thermal Capacity (MWt): Net capacity for heat transferred from nuclear fuel to coolant
+- GEM location ID: GEM-generated ID unique for each project
+
+## Data processing
+
+Filter to only include plants with Status "operating", and Region "Europe"
+No columns dropped. 
+
