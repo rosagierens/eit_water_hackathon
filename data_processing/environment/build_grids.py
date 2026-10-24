@@ -23,7 +23,7 @@ import xarray as xr
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (AIR_TEMPERATURE, DISCHARGE, INTERIM, ONE_DAY, SPACE_CHUNK, TIME_CHUNK, files_for,
-                    grid_store, horizontal_dims)
+                    grid_store, horizontal_dims, with_written_coords)
 
 
 def _standard_axes(ds):
@@ -87,6 +87,33 @@ def _encode(da, name, units, attrs):
     return ds
 
 
+def _write_in_pieces(ds, variable, store):
+    """Write the store one (time chunk x row chunk) piece at a time.
+
+    The source files are split by time (e.g. one per month) while the store is chunked for time series,
+    so writing everything at once makes dask hold many full source files in memory. Piece by piece,
+    each step reads only that slice from each file, and memory stays bounded for any period length.
+    """
+    da = ds[variable]
+    rows, _ = horizontal_dims(da)
+    template = ds.copy()
+    template[variable] = template[variable].copy(data=dask_zeros_like(template[variable]))
+    template = with_written_coords(template)
+    template.to_zarr(store, mode="w", zarr_format=2, compute=False, consolidated=True)
+    t_step, r_step = da.chunks[da.dims.index("time")][0], SPACE_CHUNK
+    for t0 in range(0, da.sizes["time"], t_step):
+        for r0 in range(0, da.sizes[rows], r_step):
+            region = {"time": slice(t0, t0 + t_step), rows: slice(r0, r0 + r_step)}
+            piece = da.isel(region).compute()
+            xr.Dataset({variable: piece.drop_vars(list(piece.coords))}).to_zarr(store, region=region, zarr_format=2)
+
+
+def dask_zeros_like(da):
+    import dask.array
+
+    return dask.array.zeros(da.shape, dtype=da.dtype, chunks=da.chunks)
+
+
 def build(dataset_id, spec, variable, units):
     files = files_for(spec)
     if not files:
@@ -115,7 +142,7 @@ def build(dataset_id, spec, variable, units):
             if store.exists():
                 shutil.rmtree(store)
             store.parent.mkdir(parents=True, exist_ok=True)
-            ds.to_zarr(store, mode="w", zarr_format=2, consolidated=True)
+            _write_in_pieces(ds, variable, store)
             print(f"{dataset_id}: {ds.sizes['time']} days "
                   f"({pd.Timestamp(ds.time.values[0]):%Y-%m-%d} .. {pd.Timestamp(ds.time.values[-1]):%Y-%m-%d}) -> {store}")
             written.append(store)
