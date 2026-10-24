@@ -1,96 +1,62 @@
-eic_p,eic_g,name_p,name_g,capacity_p,capacity_g,type_g,country,NUTS2,status_g,year_commissioned,year_decommissioned,water_type,cooling_type,water_withdrawal,water_consumption,location_id
-22WDOELX40000793,22WDOELX41500793,DOEL 4,DOEL 4,1039.0,1039.0,Nuclear,Belgium,BE23,COMMISSIONED,1985.0,,Freshwater,Natural Draught Tower,4.17,2.54,0
-22WDOELX3000078D,22WDOELX3150078D,DOEL 3,DOEL 3,1006.0,1006.0,Nuclear,Belgium,BE23,COMMISSIONED,1982.0,,Freshwater,Natural Draught Tower,4.17,2.54,0
-22WDOELX1000076X,22WDOELX1150076X,DOEL 1,DOEL 1,433.0,433.0,Nuclear,Belgium,BE23,COMMISSIONED,1975.0,,Freshwater,Once-through,167.87,1.02,0
-22WDOELX2000077N,22WDOELX2150077N,DOEL 2,DOEL 2,433.0,433.0,Nuclear,Belgium,BE23,COMMISSIONED,1975.0,,Freshwater,Once-through,167.87,1.02,0
-22WTIHANG000239G,22WTIHANG150239G,TIHANGE 1N,TIHANGE 1N,481.0,481.0,Nuclear,Belgium,BE33,COMMISSIONED,1975.0,,Freshwater,Once-through,167.87,1.02,1
-22WTIHANG000242R,22WTIHANG150242R,TIHANGE 3,TIHANGE 3,1038.0,1038.0,Nuclear,Belgium,BE33,COMMISSIONED,1985.0,,Freshwater,Once-through,167.87,1.02,1
-22WTIHANG000241T,22WTIHANG150241T,TIHANGE 2,TIHANGE 2,1008.0,1008.0,Nuclear,Belgium,BE33,COMMISSIONED,1983.0,,Freshwater,Once-through,167.87,1.02,1
-22WTIHANG000240V,22WTIHANG150240V,TIHANGE 1S,TIHANGE 1S,481.0,481.0,Nuclear,Belgium,BE33,COMMISSIONED,,,Freshwater,Once-through,167.87,1.02,1
-32W001100100217D,32W001100100016N,NPP_KOZLODUY,NPP KZL G9,2000.0,1000.0,Nuclear,Bulgaria,BG31,COMMISSIONED,1988.0,,Freshwater,Once-through,167.87,1.02,2
-32W001100100217D,32W001100100017L,NPP_KOZLODUY,NPP KZL G10,2000.0,1000.0,Nuclear,Bulgaria,BG31,COMMISSIONED,1993.0,,Freshwater,Once-through,167.87,1.02,2
-12W-0000000052-D,12W-0000000438-K,KKL - KernKW Leibstadt AG,Leibstadt,1245.0,1245.0,Nuclear,Switzerland,CH03,COMMISSIONED,1984.0,,Freshwater,Natural Draught Tower,4.17,2.54,3
-12W-0000000017-E,12W-0000000433-Z,KKB - KernKW Beznau,Beznau 2,730.0,365.0,Nuclear,Switzerland,CH03,COMMISSIONED,1969.0,,Freshwater,Once-through,167.87,1.02,4
-12W-0000000017-E,12W-0000000431-4,KKB - KernKW Beznau,Beznau 1,730.0,365.0,Nuclear,Switzerland,CH03,COMMISSIONED,1969.0,,Freshwater,Once-through,167.87,1.02,4
-12W-0000000056-1,12W-0000000945-0,Kernkraftwerk Gösgen,Kernkraftwerk Gösgen,1020.0,1020.0,Nuclear,Switzerland,CH02,COMMISSIONED,1979.0,,Freshwater,Natural Draught Tower,4.17,2.54,5
-12W-0000000057-Z,12W-0000000946-Y,KKW Mühleberg (KKM),KKM Produktion,378.0,378.0,Nuclear,Switzerland,CH01,COMMISSIONED,1972.0,,Freshwater,Once-through,167.87,1.02,6
-27W-PU-EDUK----1,27W-GU-EDUKB2--0,EDUK_______,EDUK_B2____,1880.0,470.0,Nuclear,Czechia,CZ06,COMMISSIONED,1986.0,,Freshwater,Natural Draught Tower,4.17,2.54,7
-27W-PU-EDUK----1,27W-GU-EDUKB4--T,EDUK_______,EDUK_B4____,1880.0,470.0,Nuclear,Czechia,CZ06,COMMISSIONED,1987.0,,Freshwater,Natural Draught Tower,4.17,2.54,7
-27W-PU-EDUK----1,27W-GU-EDUKB1--4,EDUK_______,EDUK_B1____,1880.0,470.0,Nuclear,Czechia,CZ06,COMMISSIONED,1985.0,,Freshwater,Natural Draught Tower,4.17,2.54,7
-27W-PU-EDUK----1,27W-GU-EDUKB3--X,EDUK_______,EDUK_B3____,1880.0,470.0,Nuclear,Czechia,CZ06,COMMISSIONED,1986.0,,Freshwater,Natural Draught Tower,4.17,2.54,7
-27W-PU-ETEM----A,27W-GU-ETEMG1--P,ETEM_______,ETEM_G1____,2056.0,1029.0,Nuclear,Czechia,CZ03,COMMISSIONED,2002.0,,Freshwater,Natural Draught Tower,4.17,2.54,8
-27W-PU-ETEM----A,27W-GU-ETEMG2--L,ETEM_______,ETEM_G2____,2056.0,1027.0,Nuclear,Czechia,CZ03,COMMISSIONED,2003.0,,Freshwater,Natural Draught Tower,4.17,2.54,8
-11WD7KRBG1K-KW-V,11WD7KRBG1KD7-CC,Gundremmingen,Gundremmingen C,1288.0,1288.0,Nuclear,Germany,DE27,COMMISSIONED,1984.0,,Freshwater,Natural Draught Tower,4.17,2.54,9
-11WD7KKE-1K--KW5,11WD7KKE-1K-BLAZ,Emsland,Emsland A,1336.0,1336.0,Nuclear,Germany,DE94,COMMISSIONED,1988.0,,Freshwater,Natural Draught Tower,4.17,2.54,10
-11WD2GHKW000296G,11WD2GROH000049H,Grohnde,Grohnde,1360.0,1360.0,Nuclear,Germany,DE92,COMMISSIONED,1985.0,,Freshwater,Once-through,167.87,1.02,11
-11WD2BRKW000294C,11WD2BROK000123P,Brokdorf,Brokdorf,1410.0,1410.0,Nuclear,Germany,DEF0,COMMISSIONED,1986.0,,Freshwater,Once-through,167.87,1.02,12
-11WD2ISKW000299Q,11WD2ISAR000122A,Isar 2,Isar 2,1410.0,1410.0,Nuclear,Germany,DE22,COMMISSIONED,1988.0,,Freshwater,Natural Draught Tower,4.17,2.54,13
-11WD4GKNK1S----S,11WD4GKNK1N-GESZ,Kernkraftwerk Neckarwestheim,KKW Neckarwestheim 2,1320.0,1320.0,Nuclear,Germany,DE11,COMMISSIONED,1989.0,,Freshwater,Natural Draught Tower,4.17,2.54,14
-11WD4KKP21N-S--O,11WD4KKP21N2---E,KKW Philippsburg,KKW Philippsburg 2,1402.0,1402.0,Nuclear,Germany,DE12,COMMISSIONED,1980.0,,Freshwater,Natural Draught Tower,4.17,2.54,15
-18WCOF1-12345-0O,18WCOF1-12345-B2,COFRENTES,COFRENTES,1063.9,1063.9,Nuclear,Spain,ES52,COMMISSIONED,1985.0,,Freshwater,Natural Draught Tower,4.17,2.54,16
-18WTRL1-12345-0Y,18WTRL1-12345-BC,TRILLO,TRILLO,1003.4,1003.4,Nuclear,Spain,ES42,COMMISSIONED,1988.0,,Freshwater,Natural Draught Tower,4.17,2.54,17
-18WASC1-12345-0Z,18WASC1-12345-BD,ASCO 1,ASCO 1,995.8,995.8,Nuclear,Spain,ES51,COMMISSIONED,1984.0,,Freshwater,Once-through,167.87,1.02,18
-18WALZ1-12345-0E,18WALZ1-12345-BT,ALMARAZ 1,ALMARAZ 1,1011.3,1011.3,Nuclear,Spain,ES43,COMMISSIONED,1983.0,,Freshwater,Once-through,167.87,1.02,19
-18WASC2-12345-0P,18WASC2-12345-B3,ASCO 2,ASCO 2,991.7,991.7,Nuclear,Spain,ES51,COMMISSIONED,1986.0,,Freshwater,Once-through,167.87,1.02,18
-18WALZ2-12345-04,18WALZ2-12345-BJ,ALMARAZ 2,ALMARAZ 2,1005.8,1005.8,Nuclear,Spain,ES43,COMMISSIONED,1984.0,,Freshwater,Once-through,167.87,1.02,19
-17W100P100P0228F,17W100P100P0146H,ST ALBAN 2,ST ALBAN 2,1335.0,1335.0,Nuclear,France,FRK2,COMMISSIONED,1987.0,,Freshwater,Once-through,167.87,1.02,20
-17W100P100P0227H,17W100P100P0145J,ST ALBAN 1,ST ALBAN 1,1335.0,1335.0,Nuclear,France,FRK2,COMMISSIONED,1986.0,,Freshwater,Once-through,167.87,1.02,20
-17W100P100P0229D,17W100P100P0147F,ST LAURENT 1,ST LAURENT 1,915.0,915.0,Nuclear,France,FRB0,COMMISSIONED,1983.0,,Freshwater,Natural Draught Tower,4.17,2.54,21
-17W100P100P0220V,17W100P100P0138G,NOGENT 2,NOGENT 2,1310.0,1310.0,Nuclear,France,FRF2,COMMISSIONED,1989.0,,Freshwater,Natural Draught Tower,4.17,2.54,22
-17W100P100P01873,17W100P100P01012,CATTENOM 1,CATTENOM 1,1300.0,1300.0,Nuclear,France,FRF3,COMMISSIONED,1978.0,,Freshwater,Natural Draught Tower,4.17,2.54,23
-17W100P100P01865,17W100P100P0091G,BELLEVILLE 2,BELLEVILLE 2,1310.0,1310.0,Nuclear,France,FRB0,COMMISSIONED,1989.0,,Freshwater,Natural Draught Tower,4.17,2.54,24
-17W100P100P01857,17W100P100P0090I,BELLEVILLE 1,BELLEVILLE 1,1310.0,1310.0,Nuclear,France,FRB0,COMMISSIONED,1988.0,,Freshwater,Natural Draught Tower,4.17,2.54,24
-17W100P100P01849,17W100P100P01004,BUGEY 5,BUGEY 5,880.0,880.0,Nuclear,France,FRK2,COMMISSIONED,1972.0,,Freshwater,Natural Draught Tower,4.17,2.54,25
-17W100P100P01881,17W100P100P0103Z,CATTENOM 2,CATTENOM 2,1300.0,1300.0,Nuclear,France,FRF3,COMMISSIONED,1988.0,,Freshwater,Natural Draught Tower,4.17,2.54,23
-17W100P100P0183B,17W100P100P00982,BUGEY 4,BUGEY 4,880.0,880.0,Nuclear,France,FRK2,COMMISSIONED,1980.0,,Freshwater,Once-through,167.87,1.02,25
-17W100P100P0182D,17W100P100P00974,BUGEY 3,BUGEY 3,910.0,910.0,Nuclear,France,FRK2,COMMISSIONED,1979.0,,Freshwater,Natural Draught Tower,4.17,2.54,25
-17W100P100P0181F,17W100P100P00966,BUGEY 2,BUGEY 2,910.0,910.0,Nuclear,France,FRK2,COMMISSIONED,1979.0,,Freshwater,Once-through,167.87,1.02,25
-17W100P100P0231Q,17W100P100P0149B,TRICASTIN 1,TRICASTIN 1,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1980.0,,Freshwater,Once-through,167.87,1.02,26
-17W100P100P0232O,17W100P100P0150Q,TRICASTIN 2,TRICASTIN 2,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1980.0,,Freshwater,Once-through,167.87,1.02,26
-17W100P100P0230S,17W100P100P0148D,ST LAURENT 2,ST LAURENT 2,915.0,915.0,Nuclear,France,FRB0,COMMISSIONED,1983.0,,Freshwater,Natural Draught Tower,4.17,2.54,21
-17W100P100P0234K,17W100P100P0153K,TRICASTIN 4,TRICASTIN 4,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1981.0,,Freshwater,Once-through,167.87,1.02,26
-17W100P100P0233M,17W100P100P0152M,TRICASTIN 3,TRICASTIN 3,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1981.0,,Freshwater,Once-through,167.87,1.02,26
-17W100P100P0203V,17W100P100P0120Z,DAMPIERRE 1,DAMPIERRE 1,890.0,890.0,Nuclear,France,FRB0,COMMISSIONED,1980.0,,Freshwater,Natural Draught Tower,4.17,2.54,27
-17W100P100P0204T,17W100P100P0121X,DAMPIERRE 2,DAMPIERRE 2,890.0,890.0,Nuclear,France,FRB0,COMMISSIONED,1981.0,,Freshwater,Natural Draught Tower,4.17,2.54,27
-17W100P100P0202X,17W100P100P0119K,CRUAS 4,CRUAS 4,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1985.0,,Freshwater,Natural Draught Tower,4.17,2.54,28
-17W100P100P0201Z,17W100P100P0118M,CRUAS 3,CRUAS 3,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1984.0,,Freshwater,Natural Draught Tower,4.17,2.54,28
-17W100P100P0208L,17W100P100P0125P,FESSENHEIM 2,FESSENHEIM 2,880.0,880.0,Nuclear,France,FRF1,COMMISSIONED,1978.0,,Freshwater,Once-through,167.87,1.02,29
-17W100P100P0207N,17W100P100P0124R,FESSENHEIM 1,FESSENHEIM 1,880.0,880.0,Nuclear,France,FRF1,COMMISSIONED,1978.0,,Freshwater,Once-through,167.87,1.02,29
-17W100P100P0206P,17W100P100P0123T,DAMPIERRE 4,DAMPIERRE 4,890.0,890.0,Nuclear,France,FRB0,COMMISSIONED,1981.0,,Freshwater,Natural Draught Tower,4.17,2.54,27
-17W100P100P0205R,17W100P100P0122V,DAMPIERRE 3,DAMPIERRE 3,890.0,890.0,Nuclear,France,FRB0,COMMISSIONED,1981.0,,Freshwater,Natural Draught Tower,4.17,2.54,27
-17W100P100P02000,17W100P100P0116Q,CRUAS 2,CRUAS 2,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1985.0,,Freshwater,Natural Draught Tower,4.17,2.54,28
-17W100P100P0212U,17W100P100P0129H,GOLFECH 2,GOLFECH 2,1310.0,1310.0,Nuclear,France,FRJ2,COMMISSIONED,1994.0,,Freshwater,Natural Draught Tower,4.17,2.54,30
-17W100P100P0219G,17W100P100P0137I,NOGENT 1,NOGENT 1,1310.0,1310.0,Nuclear,France,FRF2,COMMISSIONED,1988.0,,Freshwater,Natural Draught Tower,4.17,2.54,22
-17W100P100P0211W,17W100P100P0128J,GOLFECH 1,GOLFECH 1,1310.0,1310.0,Nuclear,France,FRJ2,COMMISSIONED,1991.0,,Freshwater,Natural Draught Tower,4.17,2.54,30
-17W100B100P0189S,17W100P100P0104X,CATTENOM 3,CATTENOM 3,1300.0,1300.0,Nuclear,France,FRF3,COMMISSIONED,1991.0,,Freshwater,Natural Draught Tower,4.17,2.54,23
-17W100P100P0198Z,17W100P100P0114U,CIVAUX 2,CIVAUX 2,1495.0,1495.0,Nuclear,France,FRI3,COMMISSIONED,2002.0,,Freshwater,Natural Draught Tower,4.17,2.54,31
-17W100P100P01970,17W100P100P0113W,CIVAUX 1,CIVAUX 1,1495.0,1495.0,Nuclear,France,FRI3,COMMISSIONED,2002.0,,Freshwater,Natural Draught Tower,4.17,2.54,31
-17W100P100P01962,17W100P100P0112Y,CHOOZ 2,CHOOZ 2,1500.0,1500.0,Nuclear,France,FRF2,COMMISSIONED,2000.0,,Freshwater,Natural Draught Tower,4.17,2.54,32
-17W100P100P0199X,17W100P100P0115S,CRUAS 1,CRUAS 1,915.0,915.0,Nuclear,France,FRK2,COMMISSIONED,1984.0,,Freshwater,Natural Draught Tower,4.17,2.54,28
-17W100P100P0191C,17W100P100P0106T,CHINON 1,CHINON 1,905.0,905.0,Nuclear,France,FRB0,COMMISSIONED,1984.0,,Freshwater,Mechanical Draught Tower,4.17,2.54,33
-17W100P100P0190E,17W100P100P0105V,CATTENOM 4,CATTENOM 4,1300.0,1300.0,Nuclear,France,FRF3,COMMISSIONED,1992.0,,Freshwater,Natural Draught Tower,4.17,2.54,23
-17W100P100P01954,17W100P100P01101,CHOOZ 1,CHOOZ 1,1500.0,1500.0,Nuclear,France,FRF2,COMMISSIONED,2000.0,,Freshwater,Natural Draught Tower,4.17,2.54,32
-17W100P100P01946,17W100P100P0109N,CHINON 4,CHINON 4,905.0,905.0,Nuclear,France,FRB0,COMMISSIONED,1988.0,,Freshwater,Mechanical Draught Tower,4.17,2.54,33
-17W100P100P01938,17W100P100P0108P,CHINON 3,CHINON 3,905.0,905.0,Nuclear,France,FRB0,COMMISSIONED,1987.0,,Freshwater,Mechanical Draught Tower,4.17,2.54,33
-17W100P100P0192A,17W100P100P0107R,CHINON 2,CHINON 2,905.0,905.0,Nuclear,France,FRB0,COMMISSIONED,1984.0,,Freshwater,Mechanical Draught Tower,4.17,2.54,33
-15WPAKS------PPL,15WPAKSG8----ST1,Paksi Atomerőmű,PA_gép8,1899.4,236.0,Nuclear,Hungary,HU23,COMMISSIONED,1987.0,,Freshwater,Once-through,167.87,1.02,34
-15WPAKS------PPL,15WPAKSG1----STK,Paksi Atomerőmű,PA_gép1,1899.4,239.9,Nuclear,Hungary,HU23,COMMISSIONED,1983.0,,Freshwater,Once-through,167.87,1.02,34
-15WPAKS------PPL,15WPAKSG3----ST4,Paksi Atomerőmű,PA_gép3,1899.4,237.8,Nuclear,Hungary,HU23,COMMISSIONED,1984.0,,Freshwater,Once-through,167.87,1.02,34
-15WPAKS------PPL,15WPAKSG6----STH,Paksi Atomerőmű,PA_gép6,1899.4,236.0,Nuclear,Hungary,HU23,COMMISSIONED,1986.0,,Freshwater,Once-through,167.87,1.02,34
-15WPAKS------PPL,15WPAKSG5----STP,Paksi Atomerőmű,PA_gép5,1899.4,236.0,Nuclear,Hungary,HU23,COMMISSIONED,1986.0,,Freshwater,Once-through,167.87,1.02,34
-15WPAKS------PPL,15WPAKSG4----STX,Paksi Atomerőmű,PA_gép4,1899.4,237.8,Nuclear,Hungary,HU23,COMMISSIONED,1984.0,,Freshwater,Once-through,167.87,1.02,34
-15WPAKS------PPL,15WPAKSG7----ST9,Paksi Atomerőmű,PA_gép7,1899.4,236.0,Nuclear,Hungary,HU23,COMMISSIONED,1987.0,,Freshwater,Once-through,167.87,1.02,34
-15WPAKS------PPL,15WPAKSG2----STC,Paksi Atomerőmű,PA_gép2,1899.4,239.9,Nuclear,Hungary,HU23,COMMISSIONED,1983.0,,Freshwater,Once-through,167.87,1.02,34
-48WSTN00000OLDSS,48W0000000OLDS2F,OLDS,OLDS2,560.0,280.0,Nuclear,United Kingdom,UKK1,decommissioned,1967.0,2011.0,Freshwater,Once-through,167.87,1.02,35
-48WSTN00000OLDSS,48W0000000OLDS1H,OLDS,OLDS1,560.0,280.0,Nuclear,United Kingdom,UKK1,decommissioned,1967.0,2011.0,Freshwater,Once-through,167.87,1.02,35
-30W-CERNAVODA--E,30UCERNCERN1---P,NPP Cernavoda,CNE_U1_RET_CA,1298.0,706.5,Nuclear,Romania,RO22,COMMISSIONED,,,Freshwater,Once-through,167.87,1.02,36
-30W-CERNAVODA--E,30UCERNCERN2---K,NPP Cernavoda,CNE_U2_RET_CA,1298.0,648.0,Nuclear,Romania,RO22,COMMISSIONED,,,Freshwater,Once-through,167.87,1.02,36
-28W-G-000000119L,28W-G-000000041W,NEK,NEK,696.0,696.0,Nuclear,Slovenia,SI03,COMMISSIONED,1981.0,,Freshwater,Once-through,167.87,1.02,37
-24WV--EBO------8,24WG--EBOG42---2,Bohunice,Bohunice TG42,1000.0,250.0,Nuclear,Slovakia,SK02,COMMISSIONED,1980.0,,Freshwater,Natural Draught Tower,4.17,2.54,38
-24WV--EBO------8,24WG--EBOG31---D,Bohunice,Bohunice TG31,1000.0,250.0,Nuclear,Slovakia,SK02,COMMISSIONED,1981.0,,Freshwater,Natural Draught Tower,4.17,2.54,38
-24WV--EBO------8,24WG--EBOG41---7,Bohunice,Bohunice TG41,1000.0,250.0,Nuclear,Slovakia,SK02,COMMISSIONED,1985.0,,Freshwater,Natural Draught Tower,4.17,2.54,38
-24WV--EBO------8,24WG--EBOG32---8,Bohunice,Bohunice TG32,1000.0,250.0,Nuclear,Slovakia,SK02,COMMISSIONED,1985.0,,Freshwater,Natural Draught Tower,4.17,2.54,38
-24WV--EMO------K,24WG--EMOG22---Q,Mochovce,Mochovce TG22,940.0,235.0,Nuclear,Slovakia,SK02,COMMISSIONED,2000.0,,Freshwater,Natural Draught Tower,4.17,2.54,39
-24WV--EMO------K,24WG--EMOG21---V,Mochovce,Mochovce TG21,940.0,235.0,Nuclear,Slovakia,SK02,COMMISSIONED,2000.0,,Freshwater,Natural Draught Tower,4.17,2.54,39
-24WV--EMO------K,24WG--EMOG12---W,Mochovce,Mochovce TG12,940.0,235.0,Nuclear,Slovakia,SK02,COMMISSIONED,1998.0,,Freshwater,Natural Draught Tower,4.17,2.54,39
-24WV--EMO------K,24WG--EMOG11---0,Mochovce,Mochovce TG11,940.0,235.0,Nuclear,Slovakia,SK02,COMMISSIONED,1998.0,,Freshwater,Natural Draught Tower,4.17,2.54,39
+Location_ID,Name,Lat,Lon,Country,Capacity_MW,P_thermal_MW_th,N_units,Cooling_type,Temp_limit,Temp_change_limit
+L100000500085,Astravets nuclear power plant,54.7598,26.0937,Belarus,1194.0,3200.0,1,Once-through,30.0,5.0
+L100000500101,Doel nuclear power plant,51.3254,4.2597,Belgium,454.0,1311.0,1,Once-through,30.0,5.0
+L100000500099,Tihange nuclear power plant,50.5334,5.2714,Belgium,1009.0,2873.0,1,Once-through,30.0,5.0
+L100000500097,Kozloduy nuclear power plant,43.7497,23.7685,Bulgaria,1040.0,3120.0,1,Once-through,30.0,5.0
+L100000500200,Dukovany nuclear power plant,49.0852,16.1479,Czech Republic,500.0,1444.0,1,Once-through,30.0,5.0
+L100000500096,Temelin nuclear power plant,49.1796,14.3795,Czech Republic,1082.0,3120.0,1,Once-through,30.0,5.0
+L100000500194,Loviisa nuclear power plant,60.3708,26.3468,Finland,531.0,1500.0,1,Once-through,30.0,5.0
+L100000500004,Olkiluoto nuclear power plant,61.2371,21.4433,Finland,920.0,2500.0,1,Once-through,30.0,5.0
+L100000500035,Belleville nuclear power plant,47.5103,2.87501,France,1363.0,3817.0,1,Once-through,30.0,5.0
+L100000500134,Blayais nuclear power plant,45.256,-0.6932,France,951.0,2785.0,1,Once-through,30.0,5.0
+L100000500136,Bugey nuclear power plant,45.7973,5.2706,France,945.0,2785.0,1,Once-through,30.0,5.0
+L100000500038,Cattenom nuclear power plant,49.416,6.2169,France,1362.0,3817.0,1,Once-through,30.0,5.0
+L100000500133,Chinon nuclear power plant,47.2254,0.1656,France,954.0,2785.0,1,Once-through,30.0,5.0
+L100000500007,Chooz nuclear power plant,50.0901,4.7872,France,1560.0,4270.0,1,Once-through,30.0,5.0
+L100000500006,Civaux nuclear power plant,46.4555,0.6582,France,1561.0,4270.0,1,Once-through,30.0,5.0
+L100000500130,Cruas nuclear power plant,44.6325,4.7546,France,956.0,2785.0,1,Once-through,30.0,5.0
+L100000500137,Dampierre nuclear power plant,47.7321,2.5185,France,937.0,2785.0,1,Once-through,30.0,5.0
+L100000500005,Flamanville nuclear power plant,49.5366,-1.8823,France,1382.0,3817.0,1,Once-through,30.0,5.0
+L100000500036,Golfech nuclear power plant,44.106,0.8443,France,1363.0,3817.0,1,Once-through,30.0,5.0
+L100000500135,Gravelines nuclear power plant,51.0141,2.1332,France,951.0,2785.0,1,Once-through,30.0,5.0
+L100000500037,Nogent nuclear power plant,48.5171,3.5181,France,1363.0,3817.0,1,Once-through,30.0,5.0
+L100000500032,Paluel nuclear power plant,49.8582,0.6354,France,1382.0,3817.0,1,Once-through,30.0,5.0
+L100000500033,Penly nuclear power plant,49.9764,1.2107,France,1382.0,3817.0,1,Once-through,30.0,5.0
+L100000500131,Saint-Laurent nuclear power plant,47.7197,1.5783,France,956.0,2785.0,1,Once-through,30.0,5.0
+L100000500034,St. Alban nuclear power plant,45.4043,4.7554,France,1381.0,3817.0,1,Once-through,30.0,5.0
+L100000500132,Tricastin nuclear power plant,44.3311,4.7311,France,955.0,2785.0,1,Once-through,30.0,5.0
+L100000500197,Paks nuclear power plant,46.57763,18.8532,Hungary,509.0,1485.0,1,Once-through,30.0,5.0
+L100000500205,Borssele nuclear power plant,51.4312,3.7174,Netherlands,515.0,1366.0,1,Once-through,30.0,5.0
+L100000500162,Cernavodă nuclear power plant,44.3205,28.0598,Romania,706.0,2180.0,1,Once-through,30.0,5.0
+L100000500250,Akademik Lomonosov nuclear power plant,69.7086,170.3011,Russia,35.0,150.0,1,Once-through,30.0,5.0
+L100000500089,Balakovo nuclear power plant,52.0928,47.9539,Russia,1000.0,3000.0,1,Once-through,30.0,5.0
+L100000500168,Beloyarsk nuclear power plant,56.8417,61.3225,Russia,600.0,1470.0,1,Once-through,30.0,5.0
+L100000500090,Kalinin nuclear power plant,57.905,35.0614,Russia,1000.0,3000.0,1,Once-through,30.0,5.0
+L100000500204,Kola nuclear power plant,67.4648,32.4821,Russia,440.0,1375.0,1,Once-through,30.0,5.0
+L100000500075,Kursk nuclear power plant,51.6764,35.6064,Russia,1000.0,3200.0,1,Once-through,30.0,5.0
+L100000500083,Leningrad nuclear power plant,59.8525,29.0486,Russia,1000.0,3200.0,1,Once-through,30.0,5.0
+L100000500086,Novovoronezh nuclear power plant,51.26677,39.2151,Russia,417.0,1375.0,1,Once-through,30.0,5.0
+L100000500087,Rostov nuclear power plant,47.6012,42.3677,Russia,1041.0,3200.0,1,Once-through,30.0,5.0
+L100000500088,Smolensk nuclear power plant,54.1658,33.2358,Russia,1000.0,3200.0,1,Once-through,30.0,5.0
+L100000500198,Bohunice nuclear power plant,48.4968,17.6907,Slovakia,500.0,1471.0,1,Once-through,30.0,5.0
+L100000500199,Mochovce nuclear power plant,48.2572,18.4553,Slovakia,500.0,1471.0,1,Once-through,30.0,5.0
+L100000500165,Krško nuclear power plant,45.9389,15.51601,Slovenia,727.0,1994.0,1,Once-through,30.0,5.0
+L100000500113,Almaraz nuclear power plant,39.807,-5.6986,Spain,1049.0,2947.0,1,Once-through,30.0,5.0
+L100000500115,Ascó nuclear power plant,41.1993,0.5694,Spain,1033.0,2941.0,1,Once-through,30.0,5.0
+L100000500081,Cofrentes nuclear power plant,39.2134,-1.0509,Spain,1102.0,3237.0,1,Once-through,30.0,5.0
+L100000500105,Trillo nuclear power plant,40.7016,-2.6227,Spain,1066.0,3010.0,1,Once-through,30.0,5.0
+L100000500114,Vandellos nuclear power plant,40.9511,0.8662,Spain,1087.0,2941.0,1,Once-through,30.0,5.0
+L100000500073,Forsmark nuclear power plant,60.4028,18.1744,Sweden,1078.0,3075.0,1,Once-through,30.0,5.0
+L100000500025,Oskarshamn nuclear power plant,57.4166,16.67301,Sweden,1450.0,3900.0,1,Once-through,30.0,5.0
+L100000500074,Ringhals nuclear power plant,57.2574,12.1087,Sweden,1117.0,3135.0,1,Once-through,30.0,5.0
+L100000500207,Beznau nuclear power plant,47.552,8.2281,Switzerland,380.0,1130.0,1,Once-through,30.0,5.0
+L100000500106,Goesgen nuclear power plant,47.3656,7.96801,Switzerland,1060.0,3002.0,1,Once-through,30.0,5.0
+L100000500051,Leibstadt nuclear power plant,47.6012,8.1845,Switzerland,1275.0,3600.0,1,Once-through,30.0,5.0
+L100000500095,Khmelnitski nuclear power plant,50.3024,26.6473,Ukraine,1000.0,3000.0,1,Once-through,30.0,5.0
+L100000500109,Rivne nuclear power plant,51.3245,25.8974,Ukraine,420.0,1375.0,1,Once-through,30.0,5.0
+L100000500221,South Ukraine nuclear power plant,47.81201,31.2201,Ukraine,1000.0,3000.0,1,Once-through,30.0,5.0
+L100000500110,Zaporizhzhia nuclear power plant,47.5067,34.5851,Ukraine,1000.0,3000.0,1,Once-through,30.0,5.0
+L100000500373,Hartlepool nuclear power plant,54.6341,-1.1801,United Kingdom,655.0,1500.0,1,Once-through,30.0,5.0
+L100000500374,Heysham nuclear power plant,54.0295,-2.9149,United Kingdom,625.0,1500.0,1,Once-through,30.0,5.0
+L100000500378,Sizewell nuclear power plant,52.2145,1.6206,United Kingdom,1250.0,3425.0,1,Once-through,30.0,5.0
+L100000500188,Torness nuclear power plant,55.9679,-2.4086,United Kingdom,682.0,1623.0,1,Once-through,30.0,5.0

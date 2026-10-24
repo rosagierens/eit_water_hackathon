@@ -1,20 +1,2 @@
-## Data processing
-
-From JRC_OPEN_UNITS.csv, keep rows where type_g = "Nuclear", water_type != "Seawater", and status_g != "DECOMMISSIONED".
-
-To create location IDs:
-- round lat and lon to 3 decimal places;
-- create a unique location key from the rounded (lat, lon) pair;
-- keep only one row per unique rounded coordinate pair;
-- assign a sequential location_id to each unique pair.
-
-To create pp_locations.csv:
-- use the deduplicated rounded-location table;
-- keep only location_id, lat, and lon;
-- write as pp_locations.csv.
-
-To create units.csv:
-- use the filtered data;
-- remove the original lat and lon columns;
-- add the matching location_id for each row based on the rounded coordinate pair;
-- save the result as units.csv.
+Citation: Kanellopoulos, K., De Felice, M., Hidalgo Gonzalez, I., Bocin Dumitriu, A. and Uihlein, A., The Joint Research Centre Power Plant Database (JRC-PPDB), EUR 29806 EN, Publications Office of the European Union, Luxembourg, 2019, ISBN 978-92-76-08849-3 (online), doi:10.2760/5281 (online), JRC117303.
+Kanellopoulos K., De Felice M., Hidalgo Gonzalez I., & Bocin A. (2019). JRC Open Power Plants Database (JRC-PPDB-OPEN) (Version 1.00) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.3574566

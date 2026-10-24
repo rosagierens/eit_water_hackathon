@@ -41,7 +41,7 @@ def build_units(filtered: pd.DataFrame, locations: pd.DataFrame) -> pd.DataFrame
 def save_outputs(out_dir: Path, pp_locations: pd.DataFrame, units: pd.DataFrame) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     pp_locations[["lat", "lon"]].to_csv(out_dir / "pp_locations.csv", index=False)
-    units.to_csv(out_dir / "units.csv", index=False)
+    units.to_csv(out_dir / "jrc_units.csv", index=False)
 
 
 def main() -> None:
