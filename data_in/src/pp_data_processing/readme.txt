@@ -24,7 +24,7 @@ Input: the filtered table from step A.
   (four plants have slightly different coordinates per unit: Cernavoda, Heysham,
   Kursk, Olkiluoto).
 
-Columns in data_cleaned/units.csv, in this order:
+Columns in data_cleaned/facilities.csv, in this order:
 
 Kept and renamed:
 
