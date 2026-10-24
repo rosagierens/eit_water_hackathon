@@ -28,6 +28,7 @@ The discharge reader in `app/core/discharge.py` still points to the former downl
 
 - Every new source dataset gets notes with its source, access date, citation, licence, and processing caveats.
 - Never modify files in `data/raw/` in place. Write source-specific processed results to `data/interim/<source>/` and application-ready outputs to `data/app_input/`.
+- Placement rule: data still as downloaded goes in `data/raw/<source>/`. That includes files that are only cropped to the study region, or unpacked from an archive. Any other processing (temporal averaging, unit or format conversion, extraction into tables) puts the result in `data/interim/<source>/`.
 - Use gridded data formats (NetCDF) through `netCDF4` and `cftime`. Keep `requirements.txt` updated with pinned versions whenever you add a dependency.
 - Large data files should not be committed unless they are small reference tables. Document how to download them instead.
 

@@ -50,11 +50,13 @@ def read_api_key():
     raise SystemExit("No API key: set CDSAPI_KEY or add 'key: <token>' to ~/.cdsapirc")
 
 
-def cds_retrieve(dataset, request, target, dry_run, unpack_dir=None):
+def cds_retrieve(dataset, request, target, dry_run, unpack_dir=None, keep_zip=True):
+    """Download target; unpack it to unpack_dir if it is a zip. keep_zip=False drops the archive after unpacking."""
     print(f"\n{dataset} -> {target}\n  {request}")
     if dry_run:
         return
-    if target.exists() and (unpack_dir is None or unpack_dir.is_dir()):
+    unpacked = unpack_dir is not None and unpack_dir.is_dir() and any(unpack_dir.iterdir())
+    if unpacked or (target.exists() and (unpack_dir is None or not zipfile.is_zipfile(target))):
         print("  already downloaded, skipping")
         return
     if not target.exists():
@@ -67,6 +69,8 @@ def cds_retrieve(dataset, request, target, dry_run, unpack_dir=None):
         with zipfile.ZipFile(target) as z:
             z.extractall(folder)
         print(f"  unpacked to {folder}")
+        if not keep_zip:
+            target.unlink()
 
 
 def crop(ds, area):
@@ -141,7 +145,8 @@ def download_observed(args):
                 "area": args.area,
             }
             target = args.out_dir / "era5_land" / "observed" / f"era5land_t2m_{stat}_{month:%Y%m}.nc"
-            unpack_dir = args.interim_dir / "era5_land" / "observed" / target.stem
+            # Unpacking a zip changes nothing, so the NetCDF files stay source data in data/raw/.
+            unpack_dir = args.out_dir / "era5_land" / "observed" / target.stem
             cds_retrieve("derived-era5-land-daily-statistics", request, target, args.dry_run, unpack_dir)
         month = next_month
 
@@ -172,8 +177,10 @@ def download_cordex(args):
                 "month": [f"{m:02d}" for m in range(1, 13)],
             }
             target = args.out_dir / "euro_cordex" / f"cordex_{args.gcm}_{args.rcm}_{args.ensemble_member}_{experiment}_{year}.zip"
-            unpack_dir = args.interim_dir / "euro_cordex" / target.stem
-            cds_retrieve("projections-cordex-domains-single-levels", request, target, args.dry_run, unpack_dir)
+            # The zip is only a container: keep the unchanged NetCDF files as source data in data/raw/.
+            unpack_dir = args.out_dir / "euro_cordex" / target.stem
+            cds_retrieve("projections-cordex-domains-single-levels", request, target, args.dry_run, unpack_dir,
+                         keep_zip=False)
 
 
 CLIMATEDT_ACTIVITY = {"hist": "baseline", "SSP3-7.0": "projections"}
@@ -189,6 +196,10 @@ def plant_points():
     return plants.reset_index().rename(columns={"GEM location ID": "id", "Latitude": "lat", "Longitude": "lon"})
 
 
+# A returned grid cell must lie this close to a plant (degrees); high resolution cells are ~0.05°.
+MAX_MATCH_DEG = 0.25
+
+
 def covjson_to_table(path, plants):
     """Long table (plant id, time, t2m in °C) from a Polytope CoverageJSON time series."""
     import numpy as np
@@ -196,16 +207,22 @@ def covjson_to_table(path, plants):
 
     data = json.loads(path.read_text())
     coverages = data.get("coverages", [data])
-    rows = []
+    rows, unmatched = [], 0
     for cov in coverages:
         axes = cov["domain"]["axes"]
+        # Polytope returns the grid cell's coordinates, with longitudes in 0..360.
         lat = axes.get("latitude", axes.get("y"))["values"][0]
-        lon = axes.get("longitude", axes.get("x"))["values"][0]
+        lon = (axes.get("longitude", axes.get("x"))["values"][0] + 180) % 360 - 180
         times = axes["t"]["values"]
         values = next(iter(cov["ranges"].values()))["values"]
-        nearest = ((plants["lat"] - lat) ** 2 + (plants["lon"] - lon) ** 2).idxmin()
-        for t, v in zip(times, values):
-            rows.append((plants.at[nearest, "id"], t, v))
+        distance = np.hypot(plants["lat"] - lat, plants["lon"] - lon)
+        if distance.min() > MAX_MATCH_DEG:  # a point of a plant no longer in the plant list
+            unmatched += 1
+            continue
+        plant_id = plants.at[distance.idxmin(), "id"]
+        rows += [(plant_id, t, v) for t, v in zip(times, values)]
+    if unmatched:
+        print(f"  {unmatched} point(s) in {path.name} match no current plant (plant list changed?); skipped")
     table = pd.DataFrame(rows, columns=["plant_id", "time", "t2m"])
     if table["t2m"].dropna().gt(200).all():  # Kelvin -> °C
         table["t2m"] = table["t2m"] - 273.15
