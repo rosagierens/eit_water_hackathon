@@ -59,10 +59,10 @@ where \(\alpha\) is set based on the cooling technology as given in Table 1.
 
 All operating nuclear units in JRC are once-through, natural draught tower or mechanical draught tower. JRC has no hybrid or "helper" tower category. Such towers fall between once-through and closed-loop towers, and some plants switch them on only in summer to protect the river, so a single \(\alpha\) does not describe them well.
 
-The cooling need for the nuclear power plant is thus expressed as
+The heat from the nuclear power plant that the river has to absorb is thus
 
 \[
-Q_{\mathrm{cool}} = \alpha \, (P_{\mathrm{th}} - P_{\mathrm{el}}).
+Q_{\mathrm{river,cooling}} = \alpha \, (P_{\mathrm{th}} - P_{\mathrm{el}}).
 \]
 
 To consider the cooling constraint relative to the maximum amount of electricity the plant can produce, we can simply use capacity for \(P_{\mathrm{el}}\).
