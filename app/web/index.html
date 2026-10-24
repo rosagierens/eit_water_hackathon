@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cooling Water Risk</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Cooling Water Risk</h1>
+    <p>How droughts and heat affect river-cooled power plants in Europe</p>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-track="1" aria-selected="true">Operations · next days</button>
+      <button role="tab" data-track="2" aria-selected="false">Planning · climate scenarios</button>
+    </nav>
+  </header>
+  <main>
+    <div id="map" aria-label="Map of nuclear power plants"></div>
+    <aside id="panel">
+      <div id="plant-info" class="hint">Select a plant on the map.</div>
+      <div id="charts"></div>
+    </aside>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@4.1.2/plotly.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
