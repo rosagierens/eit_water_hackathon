@@ -11,7 +11,7 @@ def filter_units(df: pd.DataFrame) -> pd.DataFrame:
     return df.loc[
         (df["type_g"] == "Nuclear")
         # & (df["water_type"] != "Seawater")
-        & (df["status_g"] != "DECOMMISSIONED")
+        & (df["status_g"].str.upper() != "DECOMMISSIONED")  # JRC uses both cases
     ].copy()
 
 
