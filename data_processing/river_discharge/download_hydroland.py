@@ -130,26 +130,32 @@ def list_items(args):
         print(f"{len(infos):5d}  {first}  {last}  {' / '.join(key)}")
 
 
-def postprocess(path, out, area, crop, hourly):
-    """Crop to `area` and average hourly data to daily means, one day at a time to limit memory."""
+def crop_file(path, out, area):
+    """Crop to `area`, streaming in chunks of 24 time steps so a global month never sits in memory."""
+    import xarray as xr
+
+    north, west, south, east = area
+    with xr.open_dataset(path, chunks={"time": 24}) as ds:
+        lat = next(c for c in ("lat", "latitude") if c in ds.coords)
+        lon = next(c for c in ("lon", "longitude") if c in ds.coords)
+        lat_slice = slice(north, south) if ds[lat][0] > ds[lat][-1] else slice(south, north)
+        tmp = out.with_suffix(".nc.part")
+        ds.sel({lat: lat_slice, lon: slice(west, east)}).to_netcdf(tmp)
+    tmp.rename(out)
+
+
+def daily_mean(path, out):
+    """Average hourly data to daily means, one day at a time to limit memory."""
     import numpy as np
     import xarray as xr
 
     with xr.open_dataset(path) as ds:
-        if crop:
-            north, west, south, east = area
-            lat = next(c for c in ("lat", "latitude") if c in ds.coords)
-            lon = next(c for c in ("lon", "longitude") if c in ds.coords)
-            lat_slice = slice(north, south) if ds[lat][0] > ds[lat][-1] else slice(south, north)
-            ds = ds.sel({lat: lat_slice, lon: slice(west, east)})
-        steps = ds["time"].size if "time" in ds.dims else 0
-        if not hourly and steps > 1 and (ds["time"][1] - ds["time"][0]).values < np.timedelta64(1, "D"):
-            day_of_step = ds["time"].dt.floor("D").values
-            days = [ds.isel(time=np.flatnonzero(day_of_step == d)).mean("time", keep_attrs=True)
-                    .expand_dims(time=[d]) for d in np.unique(day_of_step)]
-            ds = xr.concat(days, "time")
-            ds.attrs["hydroland_postprocessing"] = "daily mean of hourly values"
-        ds.load().to_netcdf(out)
+        day_of_step = ds["time"].dt.floor("D").values
+        days = [ds.isel(time=np.flatnonzero(day_of_step == d)).mean("time", keep_attrs=True)
+                .expand_dims(time=[d]) for d in np.unique(day_of_step)]
+        daily = xr.concat(days, "time")
+        daily.attrs["hydroland_postprocessing"] = "daily mean of hourly values"
+        daily.load().to_netcdf(out)
 
 
 def download(args):
@@ -173,34 +179,41 @@ def download(args):
         raise SystemExit(f"No '{args.product}' items between {start} and {end}; run `list` to see what exists")
 
     # Only mrm is hourly; mhm is already daily and indicators have no time axis.
-    suffix = ("_europe" if not args.no_crop else "") + ("_daily" if args.product == "mrm" and not args.hourly else "")
-    print(f"{len(items)} file(s) -> {args.out_dir} (processed: {args.interim_dir})")
+    averaged = args.product == "mrm" and not args.hourly
+    crop = not args.no_crop
+    # Placement: the download, or its Europe crop, stays in data/raw (the global file is deleted
+    # once the crop exists); daily means are processed data and go to data/interim.
+    print(f"{len(items)} file(s) -> {args.out_dir}" + (f" (daily means: {args.interim_dir})" if averaged else ""))
     for info, item in sorted(items, key=lambda x: x[0]["start"]):
         name, href = nc_asset(item)
         raw_dir = args.out_dir / info["experiment"] / info["product"]
         raw_path = raw_dir / name
-        out_dir = args.interim_dir / info["experiment"] / info["product"]
-        out = out_dir / f"{Path(name).stem}{suffix}.nc"
+        source = raw_dir / f"{Path(name).stem}_europe.nc" if crop else raw_path
+        daily = args.interim_dir / info["experiment"] / info["product"] / f"{source.stem}_daily.nc"
+        final = daily if averaged else source
         if args.dry_run:
             size = requests.head(href, headers=headers, allow_redirects=True, timeout=60).headers.get("Content-Length")
             print(f"  {name}  ({int(size) / 1e9:.1f} GB)" if size else f"  {name}  (size unknown)")
             continue
         print(f"  {name}")
-        if out.exists() or (args.no_crop and args.hourly and raw_path.exists()):
+        if final.exists():
             print("    already done, skipping")
             continue
-        if not raw_path.exists():
-            raw_dir.mkdir(parents=True, exist_ok=True)
-            tmp = raw_dir / (name + ".part")
-            fetch(href, headers, tmp)
-            tmp.rename(raw_path)
-        if args.no_crop and args.hourly:
-            print(f"    -> {raw_path}")
-        else:
-            out_dir.mkdir(parents=True, exist_ok=True)
-            print("    cropping / averaging (no progress shown, can take a few minutes) ...", flush=True)
-            postprocess(raw_path, out, args.area, crop=not args.no_crop, hourly=args.hourly)
-            print(f"    -> {out}")
+        if not source.exists():
+            if not raw_path.exists():
+                raw_dir.mkdir(parents=True, exist_ok=True)
+                tmp = raw_dir / (name + ".part")
+                fetch(href, headers, tmp)
+                tmp.rename(raw_path)
+            if crop:
+                print("    cropping to the area (no progress shown, can take a few minutes) ...", flush=True)
+                crop_file(raw_path, source, args.area)
+                raw_path.unlink()  # the Europe crop replaces the global download
+        if averaged:
+            daily.parent.mkdir(parents=True, exist_ok=True)
+            print("    averaging to daily means ...", flush=True)
+            daily_mean(source, daily)
+        print(f"    -> {final}")
 
 
 def fetch(href, headers, tmp):

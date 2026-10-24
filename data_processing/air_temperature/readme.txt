@@ -67,9 +67,10 @@ Outputs:
 - `data/raw/ecmwf/forecast/*.grib2`: original forecast. The cropped Celsius
   NetCDF is `data/interim/ecmwf/forecast/*.nc`.
 - `data/raw/era5_land/observed/*.nc`: ERA5-Land response. If the response is a
-  ZIP archive, it is extracted under `data/interim/era5_land/observed/`.
-- `data/raw/euro_cordex/*.zip`: original archive. NetCDF files are extracted
-  under `data/interim/euro_cordex/`. CORDEX daily
+  ZIP archive, it is extracted next to it under `data/raw/era5_land/observed/`
+  (unpacking changes nothing).
+- `data/raw/euro_cordex/<name>/`: the original NetCDF files, unpacked from the
+  CDS zip (the zip itself is removed, since unpacking changes nothing). CORDEX daily
   files usually cover 5 years, so asking for one year may return the whole
   5-year file (a few hundred MB per variable).
 - `data/raw/climate_dt/<experiment>/*.covjson`: original plant extraction.
@@ -83,6 +84,15 @@ Outputs:
   (the setting used in DestinE's own example) or the LUMI server
   (`--address polytope.lumi.apps.dte.destination-earth.eu`). If the server
   rejects all plant points in one request, split the request by plant.
+- **Open issue, Climate DT time steps:** the samples downloaded on 2026-10-24
+  contain only one value per day (00 UTC), although the request asks for
+  `time: 0000/to/2300/by/0100`. 00 UTC is close to the night minimum, so these
+  values are **not** daily means or maxima. Before using them, find a request
+  that returns hourly values (for example a different `time_axis`, or one
+  request per hour) and test it with a DestinE token.
+- Climate DT points are matched to plants by the returned grid-cell
+  coordinates (within 0.25°). Points of plants removed from the plant list are
+  skipped with a message. Re-extract if new plants are added.
 - Daily maximum from the forecast is computed from 3- or 6-hourly values, so
   it can underestimate the true maximum by a few tenths of a degree.
 - Time zones: all data is in UTC. ERA5-Land daily statistics can be shifted
