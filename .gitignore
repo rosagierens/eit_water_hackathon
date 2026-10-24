@@ -221,3 +221,5 @@ __marimo__/
 
 # Downloaded raw data (reproducible via download scripts)
 data_in/environmental_variables/*/raw/
+
+eit_hackathon
