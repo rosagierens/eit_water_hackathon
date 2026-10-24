@@ -243,5 +243,6 @@ __marimo__/
 /data/interim/era5_land/
 /data/interim/euro_cordex/
 /data/interim/climate_dt/
+*.zarr
 
 eit_hackathon
