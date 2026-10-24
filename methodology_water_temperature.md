@@ -24,6 +24,7 @@ We use **air2stream** (Toffolon & Piccolroaz, 2015). It is a small model, physic
 | \(t/t_y\) | Day of year as a fraction of the year |
 | \(a_1 \dots a_8\) | Parameters calibrated for each location |
 
+- **Current version (uncalibrated):** until observations are used, `data_processing/environment/water_temperature.py` runs a 4-parameter form (\(a_5 \dots a_8 = 0\)) with placeholder parameters: equilibrium \(T_w = 5 + 0.75\,T_a\) and a 3-day response at mean flow. All outputs are labelled `calibrated = false`.
 - **Calibration:** at each observation station, fit \(a_1 \dots a_8\) to the observed \(T_w\), using the same \(T_a\) and \(Q\) sources as in operation, so that their biases are absorbed into the parameters.
 - **Plants without a nearby station:** reuse the parameters of the most similar calibrated station (same river, or similar catchment size and climate). If no such station exists, use a simpler fallback: a logistic fit of \(T_w\) against 7-day mean air temperature (Mohseni et al., 1998).
 
