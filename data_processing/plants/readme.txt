@@ -3,7 +3,12 @@
 GEM operating units are merged with JRC cooling data and then aggregated to
 facility level for the app.
 
-Run from the repository root, in this order:
+To rebuild everything from the raw files with one command:
+
+    python data_processing/plants/run_pipeline.py
+
+It runs these scripts in order and stops at the first one that fails. Each can
+also be run on its own from the repository root:
 
     python data_processing/plants/process_gem_units.py
     python data_processing/plants/process_jrc_units.py

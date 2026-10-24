@@ -27,14 +27,12 @@ See [data/README.md](data/README.md) for placement rules and
 From the repository root, with dependencies from `requirements.txt` installed:
 
 ```bash
-python data_processing/plants/process_gem_units.py
-python data_processing/plants/process_jrc_units.py
-python data_processing/plants/merge_units.py
-python data_processing/plants/build_facilities.py
+python data_processing/plants/run_pipeline.py
 python -m app --reload
 ```
 
-The four plant scripts rebuild `data/app_input/facilities.csv`; skip them if the
+`run_pipeline.py` runs the four plant scripts in order and rebuilds
+`data/app_input/facilities.csv` from the raw GEM and JRC files; skip it if the
 committed file is current. See
 [data_processing/plants/readme.txt](data_processing/plants/readme.txt) for what
 each one does.
