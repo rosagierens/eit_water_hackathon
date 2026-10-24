@@ -32,9 +32,10 @@ CDS_URL = "https://cds.climate.copernicus.eu/api"
 # Europe [North, West, South, East], same box as the river discharge downloads.
 EUROPE_AREA = [72, -25, 34, 45]
 
-DEFAULT_OUT_DIR = Path(__file__).parent / "raw"
-REPO = Path(__file__).resolve().parents[3]
-PLANTS_CSV = REPO / "data_cleaned" / "nuclear_plants_europe_units.csv"
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_OUT_DIR = REPO / "data" / "raw"
+DEFAULT_INTERIM_DIR = REPO / "data" / "interim"
+PLANTS_CSV = DEFAULT_INTERIM_DIR / "global_nuclear_power_tracker" / "Operating_Europe.csv"
 
 
 def read_api_key():
@@ -49,22 +50,22 @@ def read_api_key():
     raise SystemExit("No API key: set CDSAPI_KEY or add 'key: <token>' to ~/.cdsapirc")
 
 
-def cds_retrieve(dataset, request, target, dry_run):
+def cds_retrieve(dataset, request, target, dry_run, unpack_dir=None):
     print(f"\n{dataset} -> {target}\n  {request}")
     if dry_run:
         return
-    if target.exists() or target.with_suffix("").is_dir():
+    if target.exists() and (unpack_dir is None or unpack_dir.is_dir()):
         print("  already downloaded, skipping")
         return
-    import cdsapi
+    if not target.exists():
+        import cdsapi
 
-    target.parent.mkdir(parents=True, exist_ok=True)
-    cdsapi.Client(url=CDS_URL, key=read_api_key()).retrieve(dataset, request, str(target))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        cdsapi.Client(url=CDS_URL, key=read_api_key()).retrieve(dataset, request, str(target))
     if zipfile.is_zipfile(target):  # some CDS datasets deliver a zip of NetCDF files
-        folder = target.with_suffix("")
+        folder = unpack_dir or target.with_suffix("")
         with zipfile.ZipFile(target) as z:
             z.extractall(folder)
-        target.unlink()
         print(f"  unpacked to {folder}")
 
 
@@ -96,7 +97,9 @@ def download_forecast(args):
     if args.date:
         request.update(date=args.date.replace("-", ""), time=0)
     run = client.latest(**request) if not args.date else date.fromisoformat(args.date)
-    target = args.out_dir / "forecast" / f"ecmwf_{args.product}_2t_{run:%Y%m%d}.nc"
+    name = f"ecmwf_{args.product}_2t_{run:%Y%m%d}"
+    target = args.interim_dir / "ecmwf" / "forecast" / f"{name}.nc"
+    grib = args.out_dir / "ecmwf" / "forecast" / f"{name}.grib2"
     print(f"\nECMWF open data {args.product} {run:%Y-%m-%d} 00 UTC -> {target}\n  {request}")
     if args.dry_run:
         return
@@ -106,14 +109,14 @@ def download_forecast(args):
     import xarray as xr
 
     target.parent.mkdir(parents=True, exist_ok=True)
-    grib = target.with_suffix(".grib2")
-    client.retrieve(target=str(grib), **request)
+    grib.parent.mkdir(parents=True, exist_ok=True)
+    if not grib.exists():
+        client.retrieve(target=str(grib), **request)
     # Open data is global; keep only the area, in °C, as NetCDF.
     with xr.open_dataset(grib, engine="cfgrib", backend_kwargs={"indexpath": ""}) as ds:
         t2m = crop(ds, args.area)["t2m"].load() - 273.15
     t2m.attrs.update(units="degC", long_name="2 metre temperature")
     t2m.to_dataset(name="t2m").to_netcdf(target)
-    grib.unlink()
     print(f"  saved {target.name}")
 
 
@@ -137,8 +140,9 @@ def download_observed(args):
                 "frequency": "1_hourly",
                 "area": args.area,
             }
-            target = args.out_dir / "observed" / f"era5land_t2m_{stat}_{month:%Y%m}.nc"
-            cds_retrieve("derived-era5-land-daily-statistics", request, target, args.dry_run)
+            target = args.out_dir / "era5_land" / "observed" / f"era5land_t2m_{stat}_{month:%Y%m}.nc"
+            unpack_dir = args.interim_dir / "era5_land" / "observed" / target.stem
+            cds_retrieve("derived-era5-land-daily-statistics", request, target, args.dry_run, unpack_dir)
         month = next_month
 
 
@@ -167,8 +171,9 @@ def download_cordex(args):
                 "year": [str(year)],
                 "month": [f"{m:02d}" for m in range(1, 13)],
             }
-            target = args.out_dir / "cordex" / f"cordex_{args.gcm}_{args.rcm}_{args.ensemble_member}_{experiment}_{year}.zip"
-            cds_retrieve("projections-cordex-domains-single-levels", request, target, args.dry_run)
+            target = args.out_dir / "euro_cordex" / f"cordex_{args.gcm}_{args.rcm}_{args.ensemble_member}_{experiment}_{year}.zip"
+            unpack_dir = args.interim_dir / "euro_cordex" / target.stem
+            cds_retrieve("projections-cordex-domains-single-levels", request, target, args.dry_run, unpack_dir)
 
 
 CLIMATEDT_ACTIVITY = {"hist": "baseline", "SSP3-7.0": "projections"}
@@ -178,7 +183,7 @@ def plant_points():
     import pandas as pd
 
     if not PLANTS_CSV.exists():
-        raise SystemExit(f"{PLANTS_CSV} missing; run data_in/nucler_plants/clean_plants.py first")
+        raise SystemExit(f"{PLANTS_CSV} missing; run data_processing/plants/process_plants.py first")
     units = pd.read_csv(PLANTS_CSV)
     plants = units.groupby("GEM location ID")[["Latitude", "Longitude"]].mean().round(4)
     return plants.reset_index().rename(columns={"GEM location ID": "id", "Latitude": "lat", "Longitude": "lon"})
@@ -234,9 +239,9 @@ def download_climatedt(args):
             "time_axis": "date",
         },
     }
-    out_dir = args.out_dir / "climatedt" / args.experiment
+    out_dir = args.out_dir / "climate_dt" / args.experiment
     raw = out_dir / f"climatedt_t2m_plants_{start:%Y%m%d}_{end:%Y%m%d}.covjson"
-    table_path = raw.with_suffix(".csv")
+    table_path = args.interim_dir / "climate_dt" / args.experiment / f"{raw.stem}.csv"
     shown = {**request, "feature": {**request["feature"], "points": f"[{len(plants)} plant locations]"}}
     print(f"\nPolytope ({args.address}) -> {raw}\n  {shown}")
     if args.dry_run:
@@ -247,6 +252,7 @@ def download_climatedt(args):
         out_dir.mkdir(parents=True, exist_ok=True)
         Client(address=args.address).retrieve("destination-earth", request, str(raw))
     try:
+        table_path.parent.mkdir(parents=True, exist_ok=True)
         covjson_to_table(raw, plants).to_csv(table_path, index=False)
         print(f"  saved {table_path.name}")
     except Exception as exc:  # keep the raw file; the format is converted later if this fails
@@ -256,6 +262,7 @@ def download_climatedt(args):
 def main():
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    common.add_argument("--interim-dir", type=Path, default=DEFAULT_INTERIM_DIR)
     common.add_argument("--area", type=float, nargs=4, default=EUROPE_AREA, metavar=("N", "W", "S", "E"),
                         help="bounding box (forecast and observed)")
     common.add_argument("--dry-run", action="store_true", help="print the requests without downloading")

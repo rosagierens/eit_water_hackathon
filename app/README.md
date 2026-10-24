@@ -1,6 +1,8 @@
 # App
 
-A minimal web app: a map of Europe's operating nuclear plants. Clicking a plant shows the river discharge at that plant from every data source that has been downloaded.
+A minimal web app: a map of Europe's operating nuclear plants. The map reads
+`data/app_input/facilities.csv`. Clicking a plant opens discharge charts, but
+the discharge reader still uses the former download path (see Known limits).
 
 - **Operations · next days** (track 1, operators and traders): the latest GloFAS forecast (with the ensemble range if downloaded) and the GloFAS reanalysis for the past period used to verify it.
 - **Planning · climate scenarios** (track 2, planners and investors): HydroLand and C3S scenarios overlaid on a day-of-year axis, so different years and scenarios can be compared directly.
@@ -8,19 +10,21 @@ A minimal web app: a map of Europe's operating nuclear plants. Clicking a plant 
 ## Run
 
 ```bash
-python data_in/nucler_plants/clean_plants.py      # once: builds data_cleaned/nuclear_plants_europe_units.csv
+python data_processing/plants/process_plants.py  # builds data/app_input/facilities.csv
 python -m app --reload                            # from the repo root; --port N to change the port
 ```
 
 Open http://127.0.0.1:8050. The interactive API docs are at http://127.0.0.1:8050/docs.
 If port 8050 is busy too, use `python -m app --port 8060` or set `APP_PORT`.
-Sources without downloaded data show "No data downloaded for this source yet". See `data_in/environmental_variables/river_discharge/readme.txt` for how to download them.
+See `data_processing/river_discharge/readme.txt` for source access and download
+commands. Downloads now go to source-specific folders under `data/raw/` and
+`data/interim/`. The discharge reader has not yet been migrated to those paths.
 
 ## Structure
 
 | Folder      | Role                                                                                   |
 |-------------|----------------------------------------------------------------------------------------|
-| `core/`     | Plain Python data layer: plant table and discharge time series at a plant. No web code, so notebooks or other tools can use it too. |
+| `core/`     | Plain Python data layer: the plant table from `data/app_input/` and a discharge reader that still points to the former download path. |
 | `api/`      | FastAPI JSON API (`/api/plants`, `/api/sources`, `/api/plants/{id}/discharge?track=1`); also serves `web/`. |
 | `web/`      | Static page with no build step: MapLibre GL JS map on the open-source OpenFreeMap basemap (OpenStreetMap data, no API key), plus Plotly charts. |
 
@@ -34,7 +38,9 @@ On a 5 km grid the nearest cell is often a small side stream. `core/discharge.py
 
 - The file reader finds variable and coordinate names by trying common options. It was tested on synthetic files shaped like GloFAS, HydroLand and C3S output, not yet on the real downloads. If a real file doesn't load, check the names in `DISCHARGE_VARS`, `LAT_NAMES` and `TIME_NAMES`.
 - Russian units are excluded from the GEM plant data during processing.
-- Series are read from the NetCDF files on every request. That's fine for sample data, but for full datasets, pre-extract plant time series into `data_cleaned/`.
+- `facilities.csv` keeps the first operating unit at each GEM location. Its capacity and `N_units` do not represent the total for a multi-unit plant. Its cooling type and temperature limits are provisional values applied to every facility, not verified permits. The table does not include operator names.
+- `core/discharge.py` still searches under `data_in/environmental_variables/river_discharge/raw/`. New downloads under `data/raw/<source>/` will not appear in the charts until that reader is migrated.
+- The discharge reader reads NetCDF files on every request. For full datasets, pre-extract plant time series into `data/app_input/` in a separate processing step.
 
 ## Basemap
 

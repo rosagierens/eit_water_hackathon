@@ -9,7 +9,7 @@
 #   2045  mid-century in every scenario (C3S RCP2.6/4.5/8.5, HydroLand SSP3-7.0)
 #
 # Credentials: CDSAPI_KEY (or ~/.cdsapirc) for GloFAS and C3S;
-# DESP_USERNAME / DESP_PASSWORD (or prompts) for HydroLand. See readme.txt.
+# DESP_USERNAME / DESP_PASSWORD (or prompts) for HydroLand.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -27,4 +27,4 @@ echo "== Track 2: HydroLand, August 2003 (hist) and August 2045 (SSP3-7.0), dail
 python download_hydroland.py download --start 2003-08-01 --end 2003-08-31
 python download_hydroland.py download --start 2045-08-01 --end 2045-08-31
 
-echo "Done. Files are in $(pwd)/raw/"
+echo "Done. Source files are in data/raw/<source>/; processed files are in data/interim/<source>/."

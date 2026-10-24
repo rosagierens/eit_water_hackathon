@@ -1,23 +1,34 @@
-# Data Organisation Suggestion
+# Cooling Water Risk
 
-This repository can be structured with a clear two-stage data workflow:
+This project studies how drought and high temperatures may constrain power
+generation at European nuclear plants. The planned work covers short-term
+operations and longer-term climate scenarios. The current app maps operating
+plants; the cooling-impact model is still under development.
 
-## 1. `data_in/`
+## Repository layout
 
-Use this folder for source data **as accessed** (raw or original form), along with all context needed to understand and reproduce data usage.
+| Path | Purpose |
+| --- | --- |
+| `app/` | FastAPI service and static map interface. |
+| `data/raw/<source>/` | Source files as obtained, with source notes. |
+| `data/interim/<source>/` | Filtered, extracted, or converted data from that source. |
+| `data/app_input/` | Processed files read by the application, currently `facilities.csv`. |
+| `data_processing/plants/` | GEM and JRC plant processing scripts. |
+| `data_processing/river_discharge/` | GloFAS, C3S hydrology, and HydroLand download scripts. |
+| `data_processing/air_temperature/` | ECMWF, ERA5-Land, EURO-CORDEX, and Climate DT download scripts. |
 
-Recommended contents:
-- Original input datasets
-- Notes about each dataset (source details, assumptions, caveats)
-- Citation/reference information for each source
-- Code/scripts for initial cleaning and transformation of each dataset
+Keep processing code in `data_processing/`. Do not edit source files in place.
+See [data/README.md](data/README.md) for placement rules and
+[data_processing/README.md](data_processing/README.md) for the script groups.
 
-## 2. `data_cleaned/`
+## Run the plant app
 
-Use this folder for processed input data outputs produced from `data_in/` preparation steps.
+From the repository root, with dependencies from `requirements.txt` installed:
 
-Recommended contents:
-- Cleaned/standardized datasets
-- Intermediate outputs that are ready to be combined
+```bash
+python data_processing/plants/process_plants.py
+python -m app --reload
+```
 
-The goal is to keep analysis/app-ready data separate from raw inputs while maintaining a reproducible path from source to processed data.
+Open http://127.0.0.1:8050. See [app/README.md](app/README.md) for the app's
+current capabilities and discharge-data limitation.

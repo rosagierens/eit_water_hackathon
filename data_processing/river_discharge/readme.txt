@@ -41,7 +41,7 @@ Why these:
 To get a small, comparable sample from every source in one go (once the
 credentials below are set up):
 
-  bash data_in/environmental_variables/river_discharge/download_samples.sh
+  bash data_processing/river_discharge/download_samples.sh
 
 The sample has:
   - GloFAS: the latest 10-day forecast, plus the reanalysis for July-August 2022
@@ -74,10 +74,11 @@ model chains (`--gcm`, `--rcm`) add spread within a scenario.
 3. `pip install -r requirements.txt` (requires destinelab, requests, xarray).
 4. Summarise what's available, then download by date range:
 
-  python data_in/environmental_variables/river_discharge/download_hydroland.py list
-  python .../download_hydroland.py download --start 2040-06-01 --end 2040-08-31 --dry-run
-  python .../download_hydroland.py download --start 2040-06-01 --end 2040-08-31
-  python .../download_hydroland.py download --product 5th_percentile_discharge_indicators
+  S=data_processing/river_discharge/download_hydroland.py
+  python "$S" list
+  python "$S" download --start 2040-06-01 --end 2040-08-31 --dry-run
+  python "$S" download --start 2040-06-01 --end 2040-08-31
+  python "$S" download --product 5th_percentile_discharge_indicators
 
 What is published (checked with `list`, 2026-10-24; 1454 items):
   - One simulation only: IFS-NEMO, generation-2, realization-1.
@@ -90,9 +91,9 @@ What is published (checked with `list`, 2026-10-24; 1454 items):
     There are no discharge percentile indicators for the projection. Compute
     low-flow changes yourself from the mrm data.
 
-The default product is mrm. Each downloaded month is cropped to Europe and
-averaged from hourly to daily means right away. Only the small result is kept,
-in raw/hydroland/<experiment>/<product>/*_europe_daily.nc.
+The default product is mrm. The original monthly NetCDF is kept in
+`data/raw/hydroland/<experiment>/<product>/`. A cropped, daily-mean copy is
+written to `data/interim/hydroland/<experiment>/<product>/`.
 `--hourly` keeps hourly values, `--no-crop` keeps the global grid,
 `--experiment hist|SSP3-7.0` restricts the experiment, `--product mhm` gets
 soil and runoff. Global hourly monthly files are large: use `--dry-run`
@@ -117,20 +118,22 @@ Docs: https://platform.destine.eu/docs/climate-dt-user-guide/doc/apps/hydroland/
 
 ## Usage
 
-Run from the repo root. Files go to `raw/` here (git-ignored). Add `--dry-run`
-to any command to print the request without downloading.
+Run from the repo root. GloFAS files go to `data/raw/glofas/` and C3S archives
+to `data/raw/c3s_hydrology/`. Add `--dry-run` to print a request without
+downloading.
 
   # Track 1: today's forecast run, 10 days ahead (control run, Europe)
-  python data_in/environmental_variables/river_discharge/download_river_discharge.py forecast --date 2026-10-23
+  S=data_processing/river_discharge/download_river_discharge.py
+  python "$S" forecast --date 2026-10-23
   # all 50 ensemble members (much larger)
-  python .../download_river_discharge.py forecast --date 2026-10-23 --members ensemble
+  python "$S" forecast --date 2026-10-23 --members ensemble
 
   # Track 1 verification: e.g. the 2022 European drought summer
-  python .../download_river_discharge.py historical --start 2022-06-01 --end 2022-08-31
+  python "$S" historical --start 2022-06-01 --end 2022-08-31
 
   # Track 2 complement (C3S): one model chain, mid-century in all three scenarios, plus the reference period
-  python .../download_river_discharge.py projection --experiment rcp_2_6 rcp_4_5 rcp_8_5 --years 2041 2042 2043
-  python .../download_river_discharge.py projection --experiment historical --years 1991 1992 1993
+  python "$S" projection --experiment rcp_2_6 rcp_4_5 rcp_8_5 --years 2041 2042 2043
+  python "$S" projection --experiment historical --years 1991 1992 1993
 
 ## Caveats
 
@@ -153,10 +156,11 @@ to any command to print the request without downloading.
 - Projection downloads are an archive (.zip) with NetCDF inside, covering the
   whole of Europe; there is no area subsetting on the server.
 - Getting a plant's time series: don't simply take the nearest grid cell. On a
-  5 km grid it can be a small tributary next to the main river. Use the
-  upstream-area auxiliary file to snap each plant to the cell on its cooling
-  water river (the one with the largest upstream area within ~2-3 cells).
-  Coastal plants that use seawater for cooling don't depend on river discharge.
+  5 km grid it can be a small tributary next to the main river. The current
+  app reader takes the cell with the highest mean discharge within 10 km;
+  verify this match against the cooling-water river. An upstream-area
+  auxiliary file could improve snapping later. Coastal plants that use
+  seawater for cooling don't depend on river discharge.
 
 ## Citation / licence
 

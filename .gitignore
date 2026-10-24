@@ -219,5 +219,27 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Downloaded raw data (reproducible via download scripts)
-data_in/environmental_variables/*/raw/
+# Reproducible environmental downloads and converted data.
+# Keep source notes at the top of each raw source folder trackable.
+/data/raw/glofas/*
+!/data/raw/glofas/README.md
+/data/raw/c3s_hydrology/*
+!/data/raw/c3s_hydrology/README.md
+/data/raw/hydroland/*
+!/data/raw/hydroland/README.md
+!/data/raw/hydroland/hydroland_list.txt
+/data/raw/ecmwf/*
+!/data/raw/ecmwf/README.md
+/data/raw/era5_land/*
+!/data/raw/era5_land/README.md
+/data/raw/euro_cordex/*
+!/data/raw/euro_cordex/README.md
+/data/raw/climate_dt/*
+!/data/raw/climate_dt/README.md
+/data/interim/glofas/
+/data/interim/c3s_hydrology/
+/data/interim/hydroland/
+/data/interim/ecmwf/
+/data/interim/era5_land/
+/data/interim/euro_cordex/
+/data/interim/climate_dt/

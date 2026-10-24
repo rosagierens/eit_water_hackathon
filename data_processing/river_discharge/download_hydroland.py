@@ -17,8 +17,8 @@ Products (one item per month for mrm/mhm, one item per indicator):
   python download_hydroland.py download --start 2040-06-01 --end 2040-08-31
   python download_hydroland.py download --product 5th_percentile_discharge_indicators
 
-Downloads are cropped to Europe and hourly files are averaged to daily means
-right away, so only the small result is kept (see --no-crop, --hourly).
+Downloads are kept under data/raw/hydroland. Cropped and daily-mean files are
+written to data/interim/hydroland (see --no-crop, --hourly).
 
 Credentials: your DestinE Service Platform (DESP) login, with upgraded access.
 Set DESP_USERNAME and DESP_PASSWORD, or you will be prompted (also for an
@@ -44,7 +44,9 @@ COLLECTION = "EO.UFZ.DAT.HYDROLAND"
 # Europe [North, West, South, East], same box as download_river_discharge.py.
 EUROPE_AREA = [72, -25, 34, 45]
 
-DEFAULT_OUT_DIR = Path(__file__).parent / "raw" / "hydroland"
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_OUT_DIR = REPO / "data" / "raw" / "hydroland"
+DEFAULT_INTERIM_DIR = REPO / "data" / "interim" / "hydroland"
 
 ID_FIELDS = ("model", "experiment", "generation", "activity", "realization", "product")
 
@@ -172,29 +174,33 @@ def download(args):
 
     # Only mrm is hourly; mhm is already daily and indicators have no time axis.
     suffix = ("_europe" if not args.no_crop else "") + ("_daily" if args.product == "mrm" and not args.hourly else "")
-    print(f"{len(items)} file(s) -> {args.out_dir}")
+    print(f"{len(items)} file(s) -> {args.out_dir} (processed: {args.interim_dir})")
     for info, item in sorted(items, key=lambda x: x[0]["start"]):
         name, href = nc_asset(item)
-        out_dir = args.out_dir / info["experiment"] / info["product"]
+        raw_dir = args.out_dir / info["experiment"] / info["product"]
+        raw_path = raw_dir / name
+        out_dir = args.interim_dir / info["experiment"] / info["product"]
         out = out_dir / f"{Path(name).stem}{suffix}.nc"
         if args.dry_run:
             size = requests.head(href, headers=headers, allow_redirects=True, timeout=60).headers.get("Content-Length")
             print(f"  {name}  ({int(size) / 1e9:.1f} GB)" if size else f"  {name}  (size unknown)")
             continue
         print(f"  {name}")
-        if out.exists():
+        if out.exists() or (args.no_crop and args.hourly and raw_path.exists()):
             print("    already done, skipping")
             continue
-        out_dir.mkdir(parents=True, exist_ok=True)
-        tmp = out_dir / (name + ".part")
-        fetch(href, headers, tmp)
+        if not raw_path.exists():
+            raw_dir.mkdir(parents=True, exist_ok=True)
+            tmp = raw_dir / (name + ".part")
+            fetch(href, headers, tmp)
+            tmp.rename(raw_path)
         if args.no_crop and args.hourly:
-            tmp.rename(out)
+            print(f"    -> {raw_path}")
         else:
+            out_dir.mkdir(parents=True, exist_ok=True)
             print("    cropping / averaging (no progress shown, can take a few minutes) ...", flush=True)
-            postprocess(tmp, out, args.area, crop=not args.no_crop, hourly=args.hourly)
-            tmp.unlink()
-        print(f"    -> {out.name}")
+            postprocess(raw_path, out, args.area, crop=not args.no_crop, hourly=args.hourly)
+            print(f"    -> {out}")
 
 
 def fetch(href, headers, tmp):
@@ -242,6 +248,7 @@ def main():
     p.add_argument("--no-crop", action="store_true", help="keep the global grid")
     p.add_argument("--hourly", action="store_true", help="keep hourly values instead of daily means")
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    p.add_argument("--interim-dir", type=Path, default=DEFAULT_INTERIM_DIR)
     p.add_argument("--dry-run", action="store_true", help="show matching files and their sizes only")
     p.set_defaults(func=download)
 

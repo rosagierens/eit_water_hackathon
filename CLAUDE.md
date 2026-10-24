@@ -15,18 +15,18 @@ Keep both tracks on a shared core: one plant dataset, one set of environmental-v
 
 ## Repository layout
 
-- `data_in/` holds raw source data **as accessed**, plus notes, citations, and the scripts that do the first cleaning steps. See `README.md`.
-  - `data_in/nucler_plants/` contains the Global Nuclear Power Tracker (GEM, Aug 2026, CC BY 4.0) at unit level. `notes.txt` lists the relevant columns (coordinates, capacities, GEM location ID). Filter to `Status == "operating"` and `Region == "Europe"`, excluding `Country/Area == "Russia"`.
-  - `data_in/environmental_variables/` is for meteorological and hydrological inputs (temperature, river discharge, water temperature).
-    - `river_discharge/` has two download scripts. `download_river_discharge.py` has three subcommands: `forecast` (GloFAS forecast), `historical` (GloFAS reanalysis, used for verification) and `projection` (C3S EURO-CORDEX hydrology projections, used for scenario spread, the period after 2050 and water temperature). `download_hydroland.py` gets the main projection source: DestinE Climate DT HydroLand discharge (`Qrouted`, 1990-2049) from the DestinE Data Lake, which needs a DESP login. `download_samples.sh` fetches a small comparable sample from every source: 2003 historical, the 2022 drought, and 2045 in the HydroLand SSP3-7.0 and C3S RCP2.6/4.5/8.5 scenarios. The project is currently at the sample-data stage, so prefer small downloads. `readme.txt` explains why each dataset was chosen and how to access it. Downloads go to `raw/`, which git ignores.
-    - `air_temperature/` has `download_air_temperature.py` with four subcommands: `forecast` (ECMWF open data HRES/ENS, no account needed), `observed` (ERA5-Land daily max/mean), `cordex` (EURO-CORDEX EC-EARTH/RCA4, matching the C3S discharge chain) and `climatedt` (DestinE Climate DT IFS-NEMO, the same runs as HydroLand, extracted at each plant via Polytope). It also has `download_samples.sh` and a `readme.txt`.
-- `app/` is the user interface: `core/` (data layer, plain Python), `api/` (FastAPI) and `web/` (static page: MapLibre GL JS on the open-source OpenFreeMap basemap, plus Plotly). Run it with `python -m app --reload` (port 8050; `--port` or `APP_PORT` to change); see `app/README.md`. The API is the contract between backend and frontend, so keep data logic in `core/`, not in `web/`. Track 1 (operations) comes first.
-- `data_cleaned/` holds processed outputs that the analysis and the app can use directly. Every file here must be reproducible from `data_in/` by a script.
+- `app/` is the user interface: `core/` (data layer, plain Python), `api/` (FastAPI), and `web/` (static MapLibre/Plotly page). Run `python -m app --reload` from the repository root; see `app/README.md`. Keep the API as the contract between backend and frontend. Track 1 (operations) comes first.
+- `data/raw/<source>/` holds source files as obtained, including the GEM August 2026 workbook under `global_nuclear_power_tracker/` and JRC Open Power Plants Database files under `jrc_open_power_plants/`. Source notes and citations belong beside the source files.
+- `data/interim/<source>/` holds reproducible filtered and converted outputs. GEM's `Operating_Europe.csv` and JRC's `Nuclear_commissioned.csv` are examples.
+- `data/app_input/` holds application-ready data. The plant loader reads `facilities.csv` here. The file currently uses the first operating GEM unit at each location; capacities and unit counts are not aggregated across units.
+- `data_processing/plants/` contains the GEM and JRC processors. `data_processing/river_discharge/` contains GloFAS, C3S hydrology, and HydroLand downloaders. `data_processing/air_temperature/` contains ECMWF, ERA5-Land, EURO-CORDEX, and Climate DT downloaders. Sample runners and dataset notes are beside their scripts. Prefer small downloads while the project is at the sample-data stage.
+
+The discharge reader in `app/core/discharge.py` still points to the former download location. New downloads under `data/raw/<source>/` will not appear in its charts until that reader is migrated separately.
 
 ## Conventions
 
-- Every new dataset in `data_in/` gets a `readme.txt` or `notes.txt` with its source, access date, citation, licence, and processing caveats.
-- Never modify raw files in place. Write processed results to `data_cleaned/`.
+- Every new source dataset gets notes with its source, access date, citation, licence, and processing caveats.
+- Never modify files in `data/raw/` in place. Write source-specific processed results to `data/interim/<source>/` and application-ready outputs to `data/app_input/`.
 - Use gridded data formats (NetCDF) through `netCDF4` and `cftime`. Keep `requirements.txt` updated with pinned versions whenever you add a dependency.
 - Large data files should not be committed unless they are small reference tables. Document how to download them instead.
 

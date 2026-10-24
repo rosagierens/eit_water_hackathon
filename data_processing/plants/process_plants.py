@@ -50,15 +50,16 @@ def build_facilities(units: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> None:
-    repo_root = Path(__file__).resolve().parents[3]
+    repo_root = Path(__file__).resolve().parents[2]
     gem_xlsx = (
         repo_root
-        / "data_in"
-        / "nucler_plants"
+        / "data"
+        / "raw"
+        / "global_nuclear_power_tracker"
         / "Global-Nuclear-Power-Tracker-August-2026.xlsx"
     )
-    operating_csv = repo_root / "data_in" / "nucler_plants" / "Operating_Europe.csv"
-    out_csv = repo_root / "data_cleaned" / "facilities.csv"
+    operating_csv = repo_root / "data" / "interim" / "global_nuclear_power_tracker" / "Operating_Europe.csv"
+    out_csv = repo_root / "data" / "app_input" / "facilities.csv"
 
     units = filter_operating_europe(load_gem_units(gem_xlsx))
     operating_csv.parent.mkdir(parents=True, exist_ok=True)

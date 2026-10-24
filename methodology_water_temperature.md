@@ -2,7 +2,8 @@
 
 This document explains how we get the water temperature upstream of each freshwater-cooled plant (\(T_{\mathrm{river}}\) in [methodology_cooling_constrain.md](methodology_cooling_constrain.md)). Europe has no ready-made dataset of daily river temperature at plant scale for forecasts or projections, so we **derive it from air temperature and river discharge**. We calibrate and validate it against observed water temperature.
 
-Output: daily mean water temperature (°C) at each plant location (`location_id` in `data_cleaned/units.csv`) for
+Planned output: daily mean water temperature (°C) at each plant location
+(`Location_ID` in `data/app_input/facilities.csv`) for
 - **Track 1:** the next ~10 days (forecast), plus past periods to check how good the forecast is.
 - **Track 2:** historical and future periods under several climate scenarios.
 
@@ -50,7 +51,8 @@ The JRC field `water_type` only says "Freshwater", so each plant still has to be
 | 2 Projections (main) | Climate DT IFS-NEMO, SSP3-7.0 | HydroLand (same simulation) |
 | 2 Projections (scenarios) | EURO-CORDEX EC-EARTH/RCA4, RCP2.6/4.5/8.5 | C3S E-HYPEgrid (same model chain) |
 
-Download scripts: `data_in/environmental_variables/air_temperature/` and `.../river_discharge/`.
+Download scripts: `data_processing/air_temperature/` and
+`data_processing/river_discharge/`.
 
 ## 4. Water temperature data for calibration and validation
 

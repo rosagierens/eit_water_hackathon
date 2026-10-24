@@ -29,7 +29,8 @@ CDS_URL = "https://cds.climate.copernicus.eu/api"
 # Europe [North, West, South, East]; covers all European nuclear plants.
 EUROPE_AREA = [72, -25, 34, 45]
 
-DEFAULT_OUT_DIR = Path(__file__).parent / "raw"
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_OUT_DIR = REPO / "data" / "raw"
 
 
 def read_api_key():
@@ -75,7 +76,7 @@ def download_forecast(args):
         "download_format": "unarchived",
         "area": args.area,
     }
-    target = args.out_dir / "forecast" / f"glofas_forecast_{product}_{day:%Y%m%d}.nc"
+    target = args.out_dir / "glofas" / "forecast" / f"glofas_forecast_{product}_{day:%Y%m%d}.nc"
     retrieve(EWDS_URL, "cems-glofas-forecast", request, target, args.dry_run)
 
 
@@ -116,7 +117,7 @@ def download_historical(args):
             "download_format": "unarchived",
             "area": args.area,
         }
-        target = args.out_dir / "historical" / f"glofas_historical_{args.version}_{month:%Y%m}.nc"
+        target = args.out_dir / "glofas" / "historical" / f"glofas_historical_{args.version}_{month:%Y%m}.nc"
         retrieve(EWDS_URL, "cems-glofas-historical", request, target, args.dry_run)
         month = next_month
 
@@ -151,7 +152,7 @@ def download_projection_year(args, experiment, year):
     }
     name = f"{args.hydrological_model}_{args.gcm}_{args.rcm}_{args.ensemble_member}_{experiment}_{year}"
     # The CDS returns an archive of NetCDF files for this dataset.
-    target = args.out_dir / "projection" / f"{name}.zip"
+    target = args.out_dir / "c3s_hydrology" / "projection" / f"{name}.zip"
     retrieve(CDS_URL, "sis-hydrology-variables-derived-projections", request, target, args.dry_run)
 
 

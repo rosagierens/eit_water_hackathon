@@ -16,12 +16,12 @@ def filter_units(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> None:
-    base_dir = Path(__file__).resolve().parent
-    repo_root = base_dir.parent.parent
-    src = base_dir / "JRC-PPDB-OPEN.ver1.0/JRC_OPEN_UNITS.csv"
-    out_dir = base_dir / "Nuclear_commissioned.csv"
+    repo_root = Path(__file__).resolve().parents[2]
+    src = repo_root / "data" / "raw" / "jrc_open_power_plants" / "JRC-PPDB-OPEN.ver1.0" / "JRC_OPEN_UNITS.csv"
+    out_dir = repo_root / "data" / "interim" / "jrc_open_power_plants" / "Nuclear_commissioned.csv"
     df = load_units(src)
     filtered = filter_units(df)
+    out_dir.parent.mkdir(parents=True, exist_ok=True)
     filtered.to_csv(out_dir, index=False)
 
 if __name__ == "__main__":

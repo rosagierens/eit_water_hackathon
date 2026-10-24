@@ -48,10 +48,11 @@ Why these:
 
 ## Usage
 
-Run from the repo root. Files go to `raw/` here (git-ignored). Add `--dry-run`
-to any command to print the request without downloading.
+Run from the repo root. Original downloads go to `data/raw/<source>/`; converted
+and extracted files go to `data/interim/<source>/`. Add `--dry-run` to print a
+request without downloading.
 
-  S=data_in/environmental_variables/air_temperature/download_air_temperature.py
+  S=data_processing/air_temperature/download_air_temperature.py
   python $S forecast                                   # latest HRES run, 10 days, Europe, °C
   python $S forecast --product ens --members 10        # 10 ensemble members, 15 days
   python $S observed --start 2022-07-01 --end 2022-08-31
@@ -60,16 +61,20 @@ to any command to print the request without downloading.
   python $S climatedt --experiment SSP3-7.0 --start 2045-08-01 --end 2045-08-31
   python $S climatedt --experiment hist --start 2003-08-01 --end 2003-08-31
 
-Or get the whole sample in one go: `bash data_in/environmental_variables/air_temperature/download_samples.sh`
+Or get the whole sample in one go: `bash data_processing/air_temperature/download_samples.sh`
 
 Outputs:
-- forecast/ecmwf_<product>_2t_<YYYYMMDD>.nc: t2m in °C, by step (valid_time), cropped to Europe.
-- observed/era5land_t2m_<statistic>_<YYYYMM>.nc
-- cordex/cordex_..._<experiment>_<year>/: unpacked NetCDF files. CORDEX daily
+- `data/raw/ecmwf/forecast/*.grib2`: original forecast. The cropped Celsius
+  NetCDF is `data/interim/ecmwf/forecast/*.nc`.
+- `data/raw/era5_land/observed/*.nc`: ERA5-Land response. If the response is a
+  ZIP archive, it is extracted under `data/interim/era5_land/observed/`.
+- `data/raw/euro_cordex/*.zip`: original archive. NetCDF files are extracted
+  under `data/interim/euro_cordex/`. CORDEX daily
   files usually cover 5 years, so asking for one year may return the whole
   5-year file (a few hundred MB per variable).
-- climatedt/<experiment>/climatedt_t2m_plants_<start>_<end>.csv: plant_id,
-  time, t2m (°C), hourly. The raw .covjson is kept next to it.
+- `data/raw/climate_dt/<experiment>/*.covjson`: original plant extraction.
+  The hourly `plant_id`, `time`, `t2m` (°C) CSV is under
+  `data/interim/climate_dt/<experiment>/`.
 
 ## Caveats
 
@@ -77,7 +82,7 @@ Outputs:
   that needs your token. If the request fails, try `--resolution standard`
   (the setting used in DestinE's own example) or the LUMI server
   (`--address polytope.lumi.apps.dte.destination-earth.eu`). If the server
-  rejects 61 points in one request, the request has to be split per plant.
+  rejects all plant points in one request, split the request by plant.
 - Daily maximum from the forecast is computed from 3- or 6-hourly values, so
   it can underestimate the true maximum by a few tenths of a degree.
 - Time zones: all data is in UTC. ERA5-Land daily statistics can be shifted
