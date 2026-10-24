@@ -10,9 +10,11 @@ the discharge reader still uses the former download path (see Known limits).
 ## Run
 
 ```bash
-python data_processing/plants/process_plants.py  # builds data/app_input/facilities.csv
 python -m app --reload                            # from the repo root; --port N to change the port
 ```
+
+To rebuild `data/app_input/facilities.csv`, run the four scripts in
+`data_processing/plants/` listed in its `readme.txt` first.
 
 Open http://127.0.0.1:8050. The interactive API docs are at http://127.0.0.1:8050/docs.
 If port 8050 is busy too, use `python -m app --port 8060` or set `APP_PORT`.
@@ -38,7 +40,7 @@ On a 5 km grid the nearest cell is often a small side stream. `core/discharge.py
 
 - The file reader finds variable and coordinate names by trying common options. It was tested on synthetic files shaped like GloFAS, HydroLand and C3S output, not yet on the real downloads. If a real file doesn't load, check the names in `DISCHARGE_VARS`, `LAT_NAMES` and `TIME_NAMES`.
 - Russian units are excluded from the GEM plant data during processing.
-- `facilities.csv` keeps the first operating unit at each GEM location. Its capacity and `N_units` do not represent the total for a multi-unit plant. Its cooling type and temperature limits are provisional values applied to every facility, not verified permits. The table does not include operator names.
+- `facilities.csv` has one row per GEM location, with capacity, thermal capacity and `N_units` summed over the operating units, and cooling data from JRC (`Cooling_type`, `Water_type`, `Alpha`, `Q_cool_MW_th`, `Q_river_MW_th`). The app does not use the cooling columns yet. Seawater-cooled facilities are left out. The five facilities in Ukraine and Belarus have no cooling data (`Cooling_data_flag` = `missing`). The temperature limits are provisional values applied to every facility, not verified permits. The table does not include operator names.
 - `core/discharge.py` still searches under `data_in/environmental_variables/river_discharge/raw/`. New downloads under `data/raw/<source>/` will not appear in the charts until that reader is migrated.
 - The discharge reader reads NetCDF files on every request. For full datasets, pre-extract plant time series into `data/app_input/` in a separate processing step.
 

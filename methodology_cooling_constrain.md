@@ -47,22 +47,43 @@ Q_{\mathrm{river,cooling}} = \alpha \, Q_{\mathrm{cool}}
 
 where \(\alpha\) is set based on the cooling technology as given in Table 1.
 
-**Table 1.** Share of cooling heat reaching the river (\(\alpha\)), by cooling type. From Claude, needs to be verified.
+**Table 1.** Share of cooling heat reaching the river (\(\alpha\)), by cooling type. The cooling types are the values of `cooling_type` in the JRC Open Power Plants Database. The values are project assumptions and still need to be verified. This table must stay identical to `data/raw/project_parameters/cooling_type_alpha.csv`, which the processing scripts read.
 
-| Cooling type | \(\alpha\) |
-| --- | --- |
-| Once-through | \(\sim 1.0\) |
-| Wet cooling tower (closed loop) | \(\sim 0\)–\(0.05\): most heat goes to the air by evaporation; only blowdown warms the river |
-| Hybrid or “helper” towers | Between those, and often operated seasonally. Some plants switch towers on in summer specifically to protect the river |
-| Dry / air-cooled | \(0\) |
+| Cooling type (JRC) | \(\alpha\) | Rationale |
+| --- | --- | --- |
+| Once-through | 1.0 | River water passes the condenser once and returns warmed, so almost all condenser heat reaches the river. |
+| Natural Draught Tower | 0.05 | Closed loop: most heat leaves by evaporation to the air; only blowdown warms the river. Upper end of the 0–0.05 range. |
+| Mechanical Draught Tower | 0.05 | Closed loop like a natural draught tower; fans only change how air moves through the tower. Upper end of the 0–0.05 range. |
+| Air Cooling | 0.0 | Dry cooling: heat goes to the air without cooling water. |
+| No Cooling | 0.0 | No cooling system, so no heat reaches the river. |
 
-The cooling need for the nuclear power plant is thus expressed as
+All operating nuclear units in JRC are once-through, natural draught tower or mechanical draught tower. JRC has no hybrid or "helper" tower category. Such towers fall between once-through and closed-loop towers, and some plants switch them on only in summer to protect the river, so a single \(\alpha\) does not describe them well.
+
+The heat from the nuclear power plant that the river has to absorb is thus
 
 \[
-Q_{\mathrm{cool}} = \alpha \, (P_{\mathrm{th}} - P_{\mathrm{el}}).
+Q_{\mathrm{river,cooling}} = \alpha \, (P_{\mathrm{th}} - P_{\mathrm{el}}).
 \]
 
 To consider the cooling constraint relative to the maximum amount of electricity the plant can produce, we can simply use capacity for \(P_{\mathrm{el}}\).
+
+### Facilities with several units
+
+The river constraint applies to a whole facility (one intake and outfall, one permit), but \(P_{\mathrm{th}}\), \(P_{\mathrm{el}}\) and the cooling type belong to each reactor unit. Units at the same facility can use different cooling types (for example Doel and Bugey). Heat is additive, so the heat reaching the river is calculated per unit \(i\) and summed:
+
+\[
+Q_{\mathrm{river,cooling}} = \sum_i \alpha_i \, (P_{\mathrm{th},i} - P_{\mathrm{el},i})
+\]
+
+The facility \(\alpha\) is the heat-weighted mean of the unit values:
+
+\[
+\alpha_{\mathrm{facility}} = \frac{\sum_i \alpha_i \, (P_{\mathrm{th},i} - P_{\mathrm{el},i})}{\sum_i (P_{\mathrm{th},i} - P_{\mathrm{el},i})}
+\]
+
+so that \(Q_{\mathrm{river,cooling}} = \alpha_{\mathrm{facility}} \sum_i (P_{\mathrm{th},i} - P_{\mathrm{el},i})\). If any unit at a facility has no cooling type, \(\alpha_{\mathrm{facility}}\) is left empty rather than computed from the remaining units.
+
+JRC lists turbogenerators rather than reactors, and some reactors have two. Their cooling type is taken per reactor; capacities always come from GEM.
 
 ## River heat absorption capacity
 
@@ -89,7 +110,8 @@ Q_{\mathrm{heat,max}} = \rho \, c_p \, Q_{\mathrm{river}} \, (T_{\mathrm{limit}}
 | location | GEM Global Nuclear Power Tracker | lat, lon |
 | \(P_{\mathrm{th}}\) | GEM Global Nuclear Power Tracker | Thermal Capacity (MWt)
 | \(P_{\mathrm{el}}\) | GEM Global Nuclear Power Tracker | Capacity (MW)
-| cooling-type | JRC Open Power Plants Database | 
+| cooling type | JRC Open Power Plants Database | cooling_type (per generator, combined per reactor)
+| \(\alpha\) | Project assumption, `data/raw/project_parameters/cooling_type_alpha.csv` | alpha (by cooling_type, Table 1)
 | \(Q_{\mathrm{river}}\) | | 
 | \(T_{\mathrm{river}}\) | | 
 | \(T_{\mathrm{limit}}\) | |

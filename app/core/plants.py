@@ -12,7 +12,7 @@ FACILITIES_CSV = REPO / "data" / "app_input" / "facilities.csv"
 @lru_cache
 def load_plants():
     if not FACILITIES_CSV.exists():
-        raise FileNotFoundError(f"{FACILITIES_CSV} missing; run data_processing/plants/process_plants.py")
+        raise FileNotFoundError(f"{FACILITIES_CSV} missing; run data_processing/plants/run_pipeline.py")
     plants = pd.read_csv(FACILITIES_CSV).rename(columns={
         "Location_ID": "id",
         "Name": "name",

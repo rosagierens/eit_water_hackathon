@@ -1,0 +1,6 @@
+cooling_type,alpha,rationale
+Once-through,1.0,"River water passes the condenser once and returns warmed, so almost all condenser heat reaches the river."
+Natural Draught Tower,0.05,"Closed loop: most heat leaves by evaporation to the air; only blowdown warms the river. Upper end of the 0-0.05 range."
+Mechanical Draught Tower,0.05,"Closed loop like a natural draught tower; fans only change how air moves through the tower. Upper end of the 0-0.05 range."
+Air Cooling,0.0,"Dry cooling: heat goes to the air without cooling water."
+No Cooling,0.0,"No cooling system, so no heat reaches the river."

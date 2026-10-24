@@ -183,7 +183,7 @@ def plant_points():
     import pandas as pd
 
     if not PLANTS_CSV.exists():
-        raise SystemExit(f"{PLANTS_CSV} missing; run data_processing/plants/process_plants.py first")
+        raise SystemExit(f"{PLANTS_CSV} missing; run data_processing/plants/process_gem_units.py first")
     units = pd.read_csv(PLANTS_CSV)
     plants = units.groupby("GEM location ID")[["Latitude", "Longitude"]].mean().round(4)
     return plants.reset_index().rename(columns={"GEM location ID": "id", "Latitude": "lat", "Longitude": "lon"})
