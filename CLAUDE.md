@@ -21,6 +21,7 @@ Keep both tracks on a shared core: one plant dataset, one set of environmental-v
 - `data/raw/project_parameters/` holds hand-made parameter tables, such as `cooling_type_alpha.csv` (share of cooling heat reaching the river per JRC cooling type). Keep it identical to Table 1 in `methodology_cooling_constrain.md`. `temperature_limits.csv` holds the sourced river-temperature limits per facility. Never fill it with assumed or default values: a plant without a source gets tier `missing` and empty limits.
 - `data/app_input/` holds application-ready data. The plant loader reads `facilities.csv` here: one row per GEM location, with capacities summed over operating units and a heat-weighted `Alpha`. Seawater facilities are left out in the last step (`EXCLUDED_WATER_TYPES`). Ukraine and Belarus have no cooling data (`Cooling_data_flag` = `missing`).
 - `data_processing/plants/` contains the plant pipeline: `run_pipeline.py` runs `process_gem_units.py`, `process_jrc_units.py`, `merge_units.py` and `build_facilities.py` in that order. Status comes from GEM; JRC supplies only cooling and water type. `data_processing/river_discharge/` contains GloFAS, C3S hydrology, and HydroLand downloaders. `data_processing/air_temperature/` contains ECMWF, ERA5-Land, EURO-CORDEX, and Climate DT downloaders. Sample runners and dataset notes are beside their scripts. Prefer small downloads while the project is at the sample-data stage.
+- `data_processing/environment/` standardizes all environmental data: `build_all.py` writes Europe-wide daily Zarr grids (discharge, air and water temperature) and monthly quantile statistics to `data/interim/<source>/`, and per-plant Parquet tables to `data/app_input/environment/`. That folder's README is the data contract for the app. Plant data is only read, never modified.
 
 The discharge reader in `app/core/discharge.py` still points to the former download location. New downloads under `data/raw/<source>/` will not appear in its charts until that reader is migrated separately.
 
@@ -28,6 +29,7 @@ The discharge reader in `app/core/discharge.py` still points to the former downl
 
 - Every new source dataset gets notes with its source, access date, citation, licence, and processing caveats.
 - Never modify files in `data/raw/` in place. Write source-specific processed results to `data/interim/<source>/` and application-ready outputs to `data/app_input/`.
+- Placement rule: data still as downloaded goes in `data/raw/<source>/`. That includes files that are only cropped to the study region, or unpacked from an archive. Any other processing (temporal averaging, unit or format conversion, extraction into tables) puts the result in `data/interim/<source>/`.
 - Use gridded data formats (NetCDF) through `netCDF4` and `cftime`. Keep `requirements.txt` updated with pinned versions whenever you add a dependency.
 - Large data files should not be committed unless they are small reference tables. Document how to download them instead.
 

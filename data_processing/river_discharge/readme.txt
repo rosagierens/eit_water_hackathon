@@ -91,9 +91,17 @@ What is published (checked with `list`, 2026-10-24; 1454 items):
     There are no discharge percentile indicators for the projection. Compute
     low-flow changes yourself from the mrm data.
 
-The default product is mrm. The original monthly NetCDF is kept in
-`data/raw/hydroland/<experiment>/<product>/`. A cropped, daily-mean copy is
-written to `data/interim/hydroland/<experiment>/<product>/`.
+The default product is mrm. Each global monthly file is cropped to Europe into
+`data/raw/hydroland/<experiment>/<product>/*_europe.nc`, and the **global file
+is then deleted** (20+ GB per month; the Europe crop holds everything the
+project uses, ~3 GB per hourly month). Then:
+  - mrm (hourly): daily means are written to `data/interim/hydroland/...`,
+    `*_europe_daily.nc`. `--hourly` skips this step.
+  - mhm and indicators: already daily or without a time axis, so the Europe
+    crop in raw is the result.
+  - `--no-crop`: the global file is kept as it is.
+If a run stops between download and crop, rerunning crops the global file
+already on disk without downloading again.
 `--hourly` keeps hourly values, `--no-crop` keeps the global grid,
 `--experiment hist|SSP3-7.0` restricts the experiment, `--product mhm` gets
 soil and runoff. Global hourly monthly files are large: use `--dry-run`

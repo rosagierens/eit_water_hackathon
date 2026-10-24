@@ -1,0 +1,71 @@
+{
+  "created": "2026-10-24T19:37:08+00:00",
+  "tracks": [
+    1
+  ],
+  "plants": "data/app_input/facilities.csv",
+  "cell_selection": "nearest cell within 10 km with mean discharge >= 50% of the largest within that radius. If that river carries < 10 m3/s, the search is repeated within 20 km (status extended_search; not for sea-cooled plants); otherwise status small_stream.",
+  "status_values": {
+    "ok": "main river within the normal search radius",
+    "sea_cooled": "plant cools with sea or estuary water (facilities.csv Water_type); river values are for reference only",
+    "extended_search": "river found only within 20 km (model river displaced)",
+    "small_stream": "no river >= 10 m3/s nearby: sea-, lake- or reservoir-cooled plant, or the river is missing in this model; do not use as cooling water",
+    "no_river_cell": "no grid cell with discharge nearby"
+  },
+  "datasets": {
+    "glofas_forecast": {
+      "variable": "discharge",
+      "units": "m3 s-1",
+      "label": "GloFAS forecast",
+      "source": "glofas",
+      "scenario": "forecast",
+      "track": 1,
+      "forecast_run": "2026-10-23",
+      "period": "2026-10-23..2026-11-01",
+      "years": "2026-2026",
+      "grid_store": "data/interim/glofas/europe_daily/forecast_20261023.zarr"
+    },
+    "wt_forecast": {
+      "variable": "water_temperature",
+      "units": "degC",
+      "label": "Water temperature from GloFAS forecast + ECMWF HRES forecast",
+      "source": "glofas",
+      "scenario": "forecast",
+      "track": 1,
+      "forecast_run": "2026-10-23",
+      "method": "air2stream-4p-uncalibrated-v0",
+      "calibrated": "no",
+      "discharge_dataset": "glofas_forecast",
+      "air_temperature_dataset": "ecmwf_forecast",
+      "period": "2026-10-24..2026-11-01",
+      "grid_store": "data/interim/water_temperature/europe_daily/forecast.zarr"
+    },
+    "glofas_reanalysis": {
+      "variable": "discharge",
+      "units": "m3 s-1",
+      "label": "GloFAS reanalysis (ERA5)",
+      "source": "glofas",
+      "scenario": "reanalysis",
+      "track": 1,
+      "forecast_run": null,
+      "period": "2022-07-01..2022-08-31",
+      "years": "2022-2022",
+      "grid_store": "data/interim/glofas/europe_daily/reanalysis.zarr"
+    },
+    "wt_reanalysis": {
+      "variable": "water_temperature",
+      "units": "degC",
+      "label": "Water temperature from GloFAS reanalysis (ERA5) + ERA5-Land",
+      "source": "glofas",
+      "scenario": "reanalysis",
+      "track": 1,
+      "forecast_run": null,
+      "method": "air2stream-4p-uncalibrated-v0",
+      "calibrated": "no",
+      "discharge_dataset": "glofas_reanalysis",
+      "air_temperature_dataset": "era5_land",
+      "period": "2022-07-01..2022-08-31",
+      "grid_store": "data/interim/water_temperature/europe_daily/reanalysis.zarr"
+    }
+  }
+}

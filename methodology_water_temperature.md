@@ -24,16 +24,24 @@ We use **air2stream** (Toffolon & Piccolroaz, 2015). It is a small model, physic
 | \(t/t_y\) | Day of year as a fraction of the year |
 | \(a_1 \dots a_8\) | Parameters calibrated for each location |
 
+- **Current version (uncalibrated):** until observations are used, `data_processing/environment/water_temperature.py` runs a 4-parameter form (\(a_5 \dots a_8 = 0\)) with placeholder parameters: equilibrium \(T_w = 5 + 0.75\,T_a\) and a 3-day response at mean flow. All outputs are labelled `calibrated = false`.
 - **Calibration:** at each observation station, fit \(a_1 \dots a_8\) to the observed \(T_w\), using the same \(T_a\) and \(Q\) sources as in operation, so that their biases are absorbed into the parameters.
 - **Plants without a nearby station:** reuse the parameters of the most similar calibrated station (same river, or similar catchment size and climate). If no such station exists, use a simpler fallback: a logistic fit of \(T_w\) against 7-day mean air temperature (Mohseni et al., 1998).
 
 ## 2. Lakes and reservoirs
 
-For plants cooled by a lake or reservoir:
+**Current assumption: every freshwater plant is treated as river-cooled.** The JRC field `water_type` only says "Freshwater". A manual check of the 35 freshwater plants in `data/app_input/facilities.csv` (2026-10-24) found:
+- **28** take water directly from a river.
+- **3** take it from a reservoir on a river: Dukovany, Temelín and Bohunice.
+- **4** use a cooling pond or lake: Almaraz, Khmelnytskyi, South Ukraine and Zaporizhzhia.
+
+So the river method covers most plants. The 7 non-river plants are flagged for later, once the intake and outlet locations are known. For the 4 pond/lake plants, the river method is likely to be least accurate.
+
+For plants cooled by a lake or reservoir (later):
 - **Past and present:** ERA5-Land lake mix-layer temperature (`lake_mix_layer_temperature`, simulated by the FLake lake model). Check it against satellite lake surface temperature (C3S LSWT).
 - **Forecast and projections:** **air2water** (Piccolroaz et al., 2013), the lake version of air2stream driven by air temperature only. Calibrate it on the satellite lake temperatures.
 
-The JRC field `water_type` only says "Freshwater", so each plant still has to be marked by hand as **river** or **lake/reservoir**. For lake/reservoir plants, also note the **intake depth** (see below).
+To switch a plant to this method, record the **intake depth** as well as the water body type (see below).
 
 ### Vertical structure: surface vs. deeper water
 
@@ -70,7 +78,7 @@ Download scripts: `data_processing/air_temperature/` and
 ## 5. Validation
 
 1. **Model skill.** Split each observed record into a calibration period and a separate validation period, for example odd and even years. Report the following per station:
-   - RMSE, bias and NSE of daily \(T_w\).
+   - RMSE, bias and NSE (Nash–Sutcliffe efficiency) of daily \(T_w\). NSE is the standard skill score in hydrology: it compares the model's errors with the natural variation in the observations (1 = perfect, 0 = no better than the long-term mean).
    - **Error on hot days** (\(T_w > 20\) °C), because that is where the cooling limit matters.
    - **Hit rate and false alarms for permit exceedances** (\(T_w \ge T_{\mathrm{limit}}\)).
    - Target from the literature: RMSE ≈ 1–1.5 °C for daily air2stream.

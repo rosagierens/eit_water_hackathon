@@ -13,14 +13,13 @@ cool with seawater get whatever river is nearby, so treat their values with care
 
 import zipfile
 from functools import lru_cache
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import xarray as xr
+from ..helper import get_path
 
-REPO = Path(__file__).resolve().parents[2]
-RAW = REPO / "data_in" / "environmental_variables" / "river_discharge" / "raw"
+RAW = get_path("RAW_DISCHARGE_DATA")
 
 SEARCH_RADIUS_KM = 10
 
@@ -31,14 +30,14 @@ TIME_NAMES = ("valid_time", "time")
 
 # Track 1 = operations (next days), track 2 = planning (scenarios).
 SOURCES = {
-    "glofas_forecast": dict(track=1, label="GloFAS forecast", glob="forecast/*.nc", latest_only=True),
-    "glofas_reanalysis": dict(track=1, label="GloFAS reanalysis", glob="historical/*.nc"),
-    "hydroland_hist": dict(track=2, label="HydroLand historical", glob="hydroland/hist/mrm/*.nc"),
-    "hydroland_ssp370": dict(track=2, label="HydroLand SSP3-7.0", glob="hydroland/SSP3-7.0/mrm/*.nc"),
-    "c3s_historical": dict(track=2, label="C3S historical", glob="projection/*_historical_*.zip"),
-    "c3s_rcp26": dict(track=2, label="C3S RCP2.6", glob="projection/*_rcp_2_6_*.zip"),
-    "c3s_rcp45": dict(track=2, label="C3S RCP4.5", glob="projection/*_rcp_4_5_*.zip"),
-    "c3s_rcp85": dict(track=2, label="C3S RCP8.5", glob="projection/*_rcp_8_5_*.zip"),
+    "glofas_forecast": {"track": 1, "label": "GloFAS forecast", "glob": "forecast/*.nc", "latest_only": True},
+    "glofas_reanalysis": {"track": 1, "label": "GloFAS reanalysis", "glob": "historical/*.nc"},
+    "hydroland_hist": {"track": 2, "label": "HydroLand historical", "glob": "hydroland/hist/mrm/*.nc"},
+    "hydroland_ssp370": {"track": 2, "label": "HydroLand SSP3-7.0", "glob": "hydroland/SSP3-7.0/mrm/*.nc"},
+    "c3s_historical": {"track": 2, "label": "C3S historical", "glob": "projection/*_historical_*.zip"},
+    "c3s_rcp26": {"track": 2, "label": "C3S RCP2.6", "glob": "projection/*_rcp_2_6_*.zip"},
+    "c3s_rcp45": {"track": 2, "label": "C3S RCP4.5", "glob": "projection/*_rcp_4_5_*.zip"},
+    "c3s_rcp85": {"track": 2, "label": "C3S RCP8.5", "glob": "projection/*_rcp_8_5_*.zip"},
 }
 
 
@@ -62,8 +61,14 @@ def source_files(source):
 
 
 def available_sources():
-    return {key: dict(track=spec["track"], label=spec["label"], files=len(source_files(key)))
-            for key, spec in SOURCES.items()}
+    return {
+        key: {
+            "track": spec["track"],
+            "label": spec["label"],
+            "files": len(source_files(key)),
+        }
+        for key, spec in SOURCES.items()
+    }
 
 
 def _first(names, candidates):
@@ -109,8 +114,12 @@ def _cell(path, plat, plon):
             return None
         j0, j1 = np.unravel_index(np.nanargmax(mean), mean.shape)
         index = {dims[0]: int(i0.min() + j0), dims[1]: int(i1.min() + j1)}
-        cell = dict(lat=float(lat2[index[dims[0]], index[dims[1]]]), lon=float(lon2[index[dims[0]], index[dims[1]]]),
-                    distance_km=float(dist[index[dims[0]], index[dims[1]]]))
+        i, j = index[dims[0]], index[dims[1]]
+        cell = {
+            "lat": float(lat2[i, j]),
+            "lon": float(lon2[i, j]),
+            "distance_km": float(dist[i, j]),
+        }
         return index, cell
 
 
@@ -133,7 +142,14 @@ def _series(path, index):
 def plant_series(source, plat, plon):
     """Discharge at a plant for one source, ready for JSON. `series` is empty if nothing is downloaded."""
     spec = SOURCES[source]
-    result = dict(source=source, label=spec["label"], track=spec["track"], units=None, cell=None, series=[])
+    result = {
+        "source": source,
+        "label": spec["label"],
+        "track": spec["track"],
+        "units": None,
+        "cell": None,
+        "series": [],
+    }
     files = source_files(source)
     if not files:
         result["message"] = "No data downloaded for this source yet"
@@ -153,7 +169,7 @@ def plant_series(source, plat, plon):
         values = row.dropna().to_numpy()
         if values.size == 0:
             continue
-        point = dict(time=time.isoformat(), value=float(np.median(values)))
+        point = {"time": time.isoformat(), "value": float(np.median(values))}
         if values.size > 1:  # ensemble: add the spread
             point.update(p10=float(np.percentile(values, 10)), p90=float(np.percentile(values, 90)))
         result["series"].append(point)
