@@ -67,6 +67,24 @@ Q_{\mathrm{cool}} = \alpha \, (P_{\mathrm{th}} - P_{\mathrm{el}}).
 
 To consider the cooling constraint relative to the maximum amount of electricity the plant can produce, we can simply use capacity for \(P_{\mathrm{el}}\).
 
+### Facilities with several units
+
+The river constraint applies to a whole facility (one intake and outfall, one permit), but \(P_{\mathrm{th}}\), \(P_{\mathrm{el}}\) and the cooling type belong to each reactor unit. Units at the same facility can use different cooling types (for example Doel and Bugey). Heat is additive, so the heat reaching the river is calculated per unit \(i\) and summed:
+
+\[
+Q_{\mathrm{river,cooling}} = \sum_i \alpha_i \, (P_{\mathrm{th},i} - P_{\mathrm{el},i})
+\]
+
+The facility \(\alpha\) is the heat-weighted mean of the unit values:
+
+\[
+\alpha_{\mathrm{facility}} = \frac{\sum_i \alpha_i \, (P_{\mathrm{th},i} - P_{\mathrm{el},i})}{\sum_i (P_{\mathrm{th},i} - P_{\mathrm{el},i})}
+\]
+
+so that \(Q_{\mathrm{river,cooling}} = \alpha_{\mathrm{facility}} \sum_i (P_{\mathrm{th},i} - P_{\mathrm{el},i})\). If any unit at a facility has no cooling type, \(\alpha_{\mathrm{facility}}\) is left empty rather than computed from the remaining units.
+
+JRC lists turbogenerators rather than reactors, and some reactors have two. Their cooling type is taken per reactor; capacities always come from GEM.
+
 ## River heat absorption capacity
 
 We calculate the river heat absorption capacity following the equation for energy balance of a flowing fluid (Ptak et al., 2026):
