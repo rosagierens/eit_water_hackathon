@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from pathlib import Path
 
 import uvicorn
 
@@ -14,4 +15,10 @@ parser.add_argument("--reload", action="store_true", help="restart automatically
 args = parser.parse_args()
 
 print(f"Open http://{args.host}:{args.port}  (API docs: /docs)")
-uvicorn.run("app.api.main:app", host=args.host, port=args.port, reload=args.reload)
+uvicorn.run(
+    "api.main:app",
+    app_dir=str(Path(__file__).resolve().parent),
+    host=args.host,
+    port=args.port,
+    reload=args.reload,
+)

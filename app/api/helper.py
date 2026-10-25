@@ -1,5 +1,5 @@
 from pathlib import Path
-from .config import get_settings
+from api.config import get_settings
 
 _DEFAULT_REPO = Path(__file__).resolve().parents[2]
 

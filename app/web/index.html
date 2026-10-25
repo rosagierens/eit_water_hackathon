@@ -8,18 +8,32 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Cooling Water Risk</h1>
-    <p>How droughts and heat affect river-cooled power plants in Europe</p>
+  <header class="app">
+    <div class="brand">
+      <h1>Cooling Water Risk</h1>
+      <p>How droughts and heat affect river-cooled power plants in Europe</p>
+    </div>
     <nav class="tabs" role="tablist">
       <button role="tab" data-track="1" aria-selected="true">Operations · next days</button>
       <button role="tab" data-track="2" aria-selected="false">Planning · climate scenarios</button>
     </nav>
   </header>
   <main>
-    <div id="map" aria-label="Map of nuclear power plants"></div>
+    <div id="map-wrap">
+      <div id="map" aria-label="Map of nuclear power plants"></div>
+      <div id="legend" class="legend" hidden>
+        <div class="legend-title">Net capacity</div>
+        <div class="legend-ramp"></div>
+        <div class="legend-scale"><span id="legend-min"></span><span id="legend-max"></span></div>
+      </div>
+    </div>
     <aside id="panel">
-      <div id="plant-info" class="hint">Select a plant on the map.</div>
+      <div class="search">
+        <input id="search" type="search" placeholder="Search plant or country…" autocomplete="off"
+               aria-label="Search plants" aria-controls="search-results">
+        <ul id="search-results" role="listbox" hidden></ul>
+      </div>
+      <div id="plant-info"></div>
       <div id="charts"></div>
     </aside>
   </main>
