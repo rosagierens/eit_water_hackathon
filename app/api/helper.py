@@ -15,5 +15,5 @@ def get_path(name: str) -> Path:
     if not value:
         raise ValueError(f"Setting {name!r} is not set")
 
-    repo = Path(getattr(settings, "REPO", None) or _DEFAULT_REPO)
+    repo = Path(_DEFAULT_REPO)
     return repo / value
