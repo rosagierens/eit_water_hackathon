@@ -66,6 +66,32 @@
       "air_temperature_dataset": "era5_land",
       "period": "2022-07-01..2022-08-31",
       "grid_store": "data/interim/water_temperature/europe_daily/reanalysis.zarr"
+    },
+    "curtailment_forecast": {
+      "variable": "curtailment",
+      "units": "MW",
+      "label": "Curtailment (forecast)",
+      "source": "glofas",
+      "scenario": "forecast",
+      "track": 1,
+      "forecast_run": "2026-10-23",
+      "method": "cooling-constraint-v1",
+      "calibrated": "no",
+      "period": "2026-10-24..2026-11-01",
+      "inputs": "discharge + water temperature of the same scenario; plant parameters from facilities.csv"
+    },
+    "curtailment_reanalysis": {
+      "variable": "curtailment",
+      "units": "MW",
+      "label": "Curtailment (reanalysis)",
+      "source": "glofas",
+      "scenario": "reanalysis",
+      "track": 1,
+      "forecast_run": null,
+      "method": "cooling-constraint-v1",
+      "calibrated": "no",
+      "period": "2022-07-01..2022-08-31",
+      "inputs": "discharge + water temperature of the same scenario; plant parameters from facilities.csv"
     }
   }
 }

@@ -1,0 +1,36 @@
+location_id,name,p_el_mw,q_river_cooling_mw,t_limit_c,dt_limit_c,status
+L100000500085,Astravets nuclear power plant,2388.0,,28.0,3.0,no_cooling_data
+L100000500101,Doel nuclear power plant,1998.0,1808.9,,,no_temperature_limit
+L100000500099,Tihange nuclear power plant,2098.0,3775.0,28.0,4.0,ok
+L100000500097,Kozloduy nuclear power plant,2080.0,4160.0,,3.0,ok
+L100000500200,Dukovany nuclear power plant,2000.0,188.8,21.5,1.5,ok
+L100000500096,Temelin nuclear power plant,2164.0,203.8,28.0,3.0,ok
+L100000500035,Belleville nuclear power plant,2726.0,245.4,,1.0,ok
+L100000500136,Bugey nuclear power plant,3724.0,3893.4,26.0,5.0,ok
+L100000500038,Cattenom nuclear power plant,5448.0,491.0,,1.5,ok
+L100000500133,Chinon nuclear power plant,3816.0,366.2000000000001,,1.0,ok
+L100000500007,Chooz nuclear power plant,3120.0,271.0,28.0,3.0,ok
+L100000500006,Civaux nuclear power plant,3122.0,270.90000000000003,25.0,2.0,ok
+L100000500130,Cruas nuclear power plant,3824.0,365.8,28.0,1.0,ok
+L100000500137,Dampierre nuclear power plant,3748.0,369.6,,1.0,ok
+L100000500036,Golfech nuclear power plant,2726.0,245.4,28.0,1.25,ok
+L100000500037,Nogent nuclear power plant,2726.0,245.4,28.0,3.0,ok
+L100000500131,Saint-Laurent nuclear power plant,1912.0,182.9,,1.0,ok
+L100000500034,St. Alban nuclear power plant,2762.0,4872.0,28.0,3.0,ok
+L100000500132,Tricastin nuclear power plant,3820.0,7320.0,28.0,4.0,ok
+L100000500197,Paks nuclear power plant,2027.0,3913.0,30.0,,ok
+L100000500162,Cernavodă nuclear power plant,1411.0,2949.0,35.0,10.0,ok
+L100000500198,Bohunice nuclear power plant,1000.0,97.1,28.0,,ok
+L100000500199,Mochovce nuclear power plant,1471.0,142.3,26.0,,ok
+L100000500165,Krško nuclear power plant,727.0,1267.0,28.0,3.0,ok
+L100000500113,Almaraz nuclear power plant,2093.0,3801.0,,,no_temperature_limit
+L100000500115,Ascó nuclear power plant,2060.0,3822.0,30.0,3.0,ok
+L100000500081,Cofrentes nuclear power plant,1102.0,106.75,,,no_temperature_limit
+L100000500105,Trillo nuclear power plant,1066.0,97.2,30.0,3.0,ok
+L100000500207,Beznau nuclear power plant,760.0,1500.0,25.0,3.0,ok
+L100000500106,Goesgen nuclear power plant,1060.0,97.1,25.0,3.0,ok
+L100000500051,Leibstadt nuclear power plant,1275.0,116.25,25.0,3.0,ok
+L100000500095,Khmelnitski nuclear power plant,2000.0,,,,no_cooling_data
+L100000500109,Rivne nuclear power plant,2835.0,,,,no_cooling_data
+L100000500221,South Ukraine nuclear power plant,3000.0,,,,no_cooling_data
+L100000500110,Zaporizhzhia nuclear power plant,6000.0,,,,no_cooling_data
