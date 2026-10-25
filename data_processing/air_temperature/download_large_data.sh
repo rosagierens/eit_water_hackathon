@@ -10,5 +10,5 @@ cd "$(dirname "$0")"
 echo "== Track 1: latest ECMWF HRES forecast, 10 days"
 python download_air_temperature.py forecast
 
-echo "== Track 1: ERA5-Land daily max and mean, 2023-01-01 to  2026-10-18"
-python download_air_temperature.py observed --start 2023-01-01 --end  2026-10-18
+echo "== Track 1: ERA5-Land daily max and mean, 2026-07-01 to  2026-10-18"
+python download_air_temperature.py observed --start 2026-07-01 --end  2026-10-18
