@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     FACILITIES_CSV: str
     RAW_DISCHARGE_DATA: str
     WATER_TEMPERATURE_DATA: str
+    CURTAILMENT_DATA: str
 
 
 @lru_cache

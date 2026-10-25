@@ -4,12 +4,21 @@ services:
       context: .
       dockerfile: app/Dockerfile
     image: cooling-water-risk
+    develop:
+      watch:
+        - path: ./app
+          action: rebuild
+          ignore:
+            - "**/__pycache__/"
+            - "**/*.pyc"
+            - api/.env
     environment:
       APP_NAME: ${APP_NAME:-EIT-Water-Hackathon}
       APP_ENV: ${APP_ENV:-production}
       FACILITIES_CSV: ${FACILITIES_CSV:-data/app_input/facilities.csv}
       RAW_DISCHARGE_DATA: ${RAW_DISCHARGE_DATA:-data/app_input/environment/discharge.parquet}
       WATER_TEMPERATURE_DATA: ${WATER_TEMPERATURE_DATA:-data/app_input/environment/water_temperature.parquet}
+      CURTAILMENT_DATA: ${CURTAILMENT_DATA:-data/app_input/environment/curtailment.parquet}
     ports:
       - "${APP_PORT:-8050}:8050"
     volumes:

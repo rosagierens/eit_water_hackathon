@@ -20,6 +20,33 @@ your browser.
 Stop with `Ctrl+C`, or run in the background with `docker compose up --build -d` and stop with
 `docker compose down`.
 
+## Rebuild on every change (development)
+
+```bash
+docker compose up --build --watch
+```
+
+Compose watches `app/` and rebuilds the image and restarts the container whenever a file
+there changes (Python, the web page, `requirements.txt` or the Dockerfile). Only the steps
+after the changed file rerun, so a code change rebuilds in seconds; a change to
+`requirements.txt` reinstalls the packages. Needs Docker Compose 2.22 or newer
+(`docker compose version`). Data in `data/app_input/` is mounted, not watched: see
+[Updating the data](#updating-the-data).
+
+### With Podman
+
+`podman compose` runs whichever compose provider is installed (`podman compose version`
+prints it). With `docker-compose` as provider, the command above works with `podman` in place
+of `docker`. `podman-compose` does not support `--watch`; use the script instead, which
+rebuilds with `podman compose up --build -d` whenever a file under `app/` changes:
+
+```bash
+app/compose-watch.sh                          # Ctrl+C stops watching; `podman compose down` stops the app
+COMPOSE="docker compose" app/compose-watch.sh # the same script with Docker
+```
+
+Follow the app's log in another terminal with `podman compose logs -f`.
+
 To use another port on your machine:
 
 ```bash
@@ -81,6 +108,7 @@ The settings that `app/api/.env` holds for local runs are set as environment var
 | `FACILITIES_CSV` | `data/app_input/facilities.csv` | Plant table |
 | `RAW_DISCHARGE_DATA` | `data/app_input/environment/discharge.parquet` | River discharge table |
 | `WATER_TEMPERATURE_DATA` | `data/app_input/environment/water_temperature.parquet` | Water temperature table |
+| `CURTAILMENT_DATA` | `data/app_input/environment/curtailment.parquet` | Curtailment table |
 
 Paths are relative to the repository root, which is `/srv` in the container. Example:
 

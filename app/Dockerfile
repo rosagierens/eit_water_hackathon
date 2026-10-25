@@ -10,7 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 #     APP_ENV="production" \
 #     FACILITIES_CSV="data/app_input/facilities.csv" \
 #     RAW_DISCHARGE_DATA="data/app_input/environment/discharge.parquet" \
-#     WATER_TEMPERATURE_DATA="data/app_input/environment/water_temperature.parquet"
+#     WATER_TEMPERATURE_DATA="data/app_input/environment/water_temperature.parquet" \
+#     CURTAILMENT_DATA="data/app_input/environment/curtailment.parquet"
 
 WORKDIR /src
 

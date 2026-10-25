@@ -29,10 +29,14 @@ def load_plants():
         "Q_river_MW_th": "heat_to_river_mw_th",
         "Alpha": "alpha",
         "Cooling_data_flag": "cooling_data_flag",
+        "Temp_limit_sources": "temp_limit_sources",
+        "valid_from": "valid_from",
+        "valid_to": "valid_to",
+        "Regulation_level": "regulation_level"
     })
     plants = plants[["id", "name", "country", "lat", "lon", "units", "capacity_mw",
                      "cooling_type", "water_type", "temp_limit_c", "temp_change_limit_c",
-                     "heat_to_river_mw_th", "alpha", "cooling_data_flag"]].copy()
+                     "heat_to_river_mw_th", "alpha", "cooling_data_flag", "temp_limit_sources", "valid_from", "valid_to", "regulation_level"]].copy()
     plants["name"] = plants["name"].str.replace(" nuclear power plant", "", regex=False)
     plants["country"] = plants["country"].fillna("")
     plants["operator"] = ""  # The facility table does not contain an operator.

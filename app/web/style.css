@@ -18,10 +18,12 @@
   --tint-blue: #eaf2fd;
   --tint-orange: #fdede6;
   --tint-green: #e5f6ef;
+  --tint-violet: #f1ecfb;
   /* Chart series (validated categorical slots, see the dataviz palette). */
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
+  --series-4: #7c4ddb;
   --reference: #898781;
   --limit: #d03b3b; /* legal/permit limit lines */
   --series-compare: #1baf7a; /* the second plant in compare mode; also its map ring */
@@ -51,9 +53,11 @@
     --tint-blue: #16243a;
     --tint-orange: #33201a;
     --tint-green: #142b23;
+    --tint-violet: #221a33;
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
+    --series-4: #9a74e8;
     --reference: #898781;
     --limit: #e66767;
     --series-compare: #199e70;
@@ -237,6 +241,9 @@ main { flex: 1; display: flex; min-height: 0; }
 .cool-item dd small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
 .cooling .muted { color: var(--muted); font-weight: 400; }
 .provisional { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+.legal-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden; }
+.legal.open .legal-text { display: block; }
+.legal-toggle { margin-top: 2px; padding: 0; border: 0; background: none; font: inherit; font-size: 12px; color: var(--text-secondary); text-decoration: underline; cursor: pointer; }
 
 .compare-btn, .cancel-compare {
   margin-top: 6px;
@@ -299,6 +306,7 @@ main { flex: 1; display: flex; min-height: 0; }
 }
 .accent-discharge { --card-accent: var(--series-1); --card-tint: var(--tint-blue); }
 .accent-temperature { --card-accent: var(--series-2); --card-tint: var(--tint-orange); }
+.accent-curtailment { --card-accent: var(--series-4); --card-tint: var(--tint-violet); }
 .accent-other { --card-accent: var(--series-3); --card-tint: var(--tint-green); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
 .card-head { display: flex; align-items: center; gap: 8px; }
@@ -311,6 +319,7 @@ main { flex: 1; display: flex; min-height: 0; }
   color: var(--text-secondary);
 }
 .card .sub { margin: 2px 0 0; font-size: 13px; color: var(--text-secondary); }
+.card .warning { margin: 4px 0 8px; font-size: 12px; color: var(--limit); }
 .card .cell { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
 .chart { height: 330px; margin-top: 8px; }
 .chart.tall { height: 370px; }
@@ -321,14 +330,6 @@ main { flex: 1; display: flex; min-height: 0; }
 .stats dd { margin: 0; font-size: 18px; font-weight: 600; }
 .stats dd small { font-size: 12px; font-weight: 400; color: var(--text-secondary); }
 .stats dd.when { font-size: 12px; font-weight: 400; color: var(--muted); }
-
-.table-view { margin-top: 8px; font-size: 13px; }
-.table-view summary { cursor: pointer; color: var(--text-secondary); }
-.table-wrap { max-height: 240px; overflow: auto; margin-top: 6px; }
-.table-view table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.table-view th, .table-view td { padding: 3px 6px; text-align: left; border-bottom: 1px solid var(--border); }
-.table-view th { position: sticky; top: 0; background: var(--surface); font-weight: 600; }
-.table-view td:last-child, .table-view th:last-child { text-align: right; }
 
 .skeleton { height: 320px; background: var(--skeleton); border: 0; border-top: 0; animation: pulse 1.2s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.5; } }

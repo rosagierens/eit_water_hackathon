@@ -11,6 +11,7 @@ const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 const QUANTITIES = {
   discharge: { key: "discharge", name: "River discharge", unit: "m³/s", color: "--series-1", format: ",.0f", zero: true },
   temperature: { key: "temperature", name: "Water temperature", unit: "°C", color: "--series-2", format: ".1f", zero: false },
+  curtailment: { key: "curtailment", name: "Curtailment", unit: "MW", color: "--series-4", format: ",.0f", zero: true, shape: "linear" },
   other: { key: "other", name: "Value", unit: "", color: "--series-3", format: ",.2f", zero: false },
 };
 
@@ -29,6 +30,7 @@ const token = (name) => getComputedStyle(document.documentElement).getPropertyVa
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 function quantityOf(source) {
+  if (source.variable === "curtailment") return QUANTITIES.curtailment;
   const u = (source.units || "").toLowerCase();
   if (u.includes("degc") || u.includes("°c") || /temperature/i.test(source.label)) return QUANTITIES.temperature;
   if (u.includes("m3") || u.includes("m³") || /discharge/i.test(source.label)) return QUANTITIES.discharge;
@@ -171,6 +173,12 @@ document.getElementById("panel").addEventListener("click", (e) => {
   if (e.target.closest(".back")) showOverview();
   if (e.target.closest(".compare-btn")) { state.picking = true; renderPlantInfo(); searchInput.focus(); }
   if (e.target.closest(".cancel-compare")) { state.picking = false; renderPlantInfo(); }
+  const legalToggle = e.target.closest(".legal-toggle");
+  if (legalToggle) {
+    const open = legalToggle.parentElement.classList.toggle("open");
+    legalToggle.setAttribute("aria-expanded", open);
+    legalToggle.textContent = open ? "Show less" : "Show more";
+  }
   if (e.target.closest(".clear-compare")) { state.compare = null; setMapFilter("plant-compare", null); renderPlantInfo(); loadCharts(); }
 });
 document.getElementById("panel").addEventListener("mouseover", (e) => {
@@ -224,6 +232,9 @@ function renderPlantInfo() {
     <ul class="facts">${facts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>
     ${coolingCard(plant)}
     ${compare}`;
+  // Offer "Show more" only when the legal reference does not fit on one line.
+  const legal = document.querySelector("#plant-info .legal-text");
+  if (legal && legal.scrollHeight > legal.clientHeight + 1) legal.nextElementSibling.hidden = false;
 }
 
 // Cooling set-up and the river temperature limits the plant must respect.
@@ -245,8 +256,14 @@ function coolingCard(plant) {
         ${item("♨", "Heat to the river", heat, share)}
         ${item("🌡", "Max temperature downstream", plant.temp_limit_c == null ? null : `${num(plant.temp_limit_c, 1)} °C`)}
         ${item("↑", "Max warming of the river", plant.temp_change_limit_c == null ? null : `+${num(plant.temp_change_limit_c, 1)} °C`)}
+        ${item("§", "Regulation level", plant.regulation_level ? esc(plant.regulation_level) : null,
+          !plant.regulation_level || plant.regulation_level === "No limit found" ? "no regulation level data" : "")}
       </dl>
-      <p class="provisional">Limits are a provisional default used for every plant, not yet the national legal values.</p>
+      ${plant.temp_limit_sources ? `
+      <div class="legal">
+        <p class="provisional legal-text">Legal reference: ${esc(plant.temp_limit_sources)}</p>
+        <button class="legal-toggle" aria-expanded="false" hidden>Show more</button>
+      </div>` : ""}
     </section>`;
 }
 
@@ -312,10 +329,14 @@ async function loadCharts() {
     for (const s of withData) {
       const q = quantityOf(s);
       const o = otherSource(s.source);
-      const traces = timeTraces(s, q, o ? state.plant.name : null);
-      if (o) traces.push(compareTrace(o, q));
+      const curtail = q.key === "curtailment";
+      const traces = curtail ? curtailmentTraces(s, q, state.plant, o ? state.plant.name : null) : timeTraces(s, q, o ? state.plant.name : null);
+      if (o) traces.push(curtail ? curtailmentTraces(o, q, state.compare, state.compare.name, true)[0] : compareTrace(o, q));
+      // An invisible point on the % axis so Plotly draws that axis.
+      if (curtail && !o) traces.push({ x: [s.series[0].time], y: [0], yaxis: "y2", mode: "markers", opacity: 0, hoverinfo: "skip", showlegend: false });
       addChart(charts, {
         title: q.name, badge: badgeOf(s), source: s, quantity: q, traces,
+        ...(curtail && !o ? capacityAxes(state.plant.capacity_mw) : {}),
         subtitle: s.forecast_run ? `${s.label} · run of ${new Date(s.forecast_run).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}` : s.label,
         xaxis: { type: "date", tickformat: "%d %b", hoverformat: "%a %d %b %Y", ...rangeButtons(s) },
         shapes: [...todayMarker(s), ...limitLine(q)], stats: [[s, o ? state.plant.name : null], ...(o ? [[o, state.compare.name]] : [])],
@@ -408,7 +429,7 @@ function badgeOf(s) {
   return "";
 }
 
-function addChart(parent, { title, badge, subtitle, source, quantity, traces, xaxis, yrange, shapes = [], stats = [] }) {
+function addChart(parent, { title, badge, subtitle, source, quantity, traces, xaxis, yaxis = {}, yaxis2, yrange, shapes = [], stats = [] }) {
   const block = document.createElement("section");
   block.className = `card accent-${quantity.key}`;
   const cell = source.cell
@@ -419,16 +440,11 @@ function addChart(parent, { title, badge, subtitle, source, quantity, traces, xa
       <h3>${esc(title)}</h3>${badge ? `<span class="badge">${esc(badge)}</span>` : ""}
     </header>
     <p class="sub">${esc(subtitle)}</p>
+    ${source.warning ? `<p class="warning">${esc(source.warning)}</p>` : ""}
     ${stats.map(([src, label], i) => statsRow(src, quantity, label, i)).join("")}
     <div class="chart" role="img" aria-label="${esc(`${title}: ${subtitle}`)}"></div>
-    ${cell ? `<p class="cell">${esc(cell)}</p>` : ""}
-    <details class="table-view"><summary>Show data table</summary></details>`;
+    ${cell ? `<p class="cell">${esc(cell)}</p>` : ""}`;
   parent.appendChild(block);
-
-  const details = block.querySelector("details");
-  details.addEventListener("toggle", () => {
-    if (details.open && !details.querySelector("table")) details.insertAdjacentHTML("beforeend", dataTable(traces, quantity));
-  });
 
   const unit = quantity.unit ? ` (${quantity.unit})` : "";
   const showLegend = traces.filter((t) => t.showlegend !== false).length > 1;
@@ -441,7 +457,7 @@ function addChart(parent, { title, badge, subtitle, source, quantity, traces, xa
   Plotly.newPlot(chartDiv, traces, {
     font: { family: token("--font"), size: 12, color: token("--text-secondary") },
     paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-    margin: { l: 56, r: 12, t: xaxis.rangeselector || showLegend ? 40 : 8, b: 24 },
+    margin: { l: 56, r: yaxis2 ? 56 : 12, t: xaxis.rangeselector || showLegend ? 40 : 8, b: 24 },
     hovermode: "x unified",
     hoverlabel: { bgcolor: token("--surface"), bordercolor: token("--border-strong"), font: { color: token("--text") } },
     xaxis: { ...axisCommon, ...xaxis, showspikes: true, spikemode: "across", spikethickness: 1,
@@ -450,7 +466,8 @@ function addChart(parent, { title, badge, subtitle, source, quantity, traces, xa
              rangeslider: { visible: true, thickness: 0.1, bgcolor: token("--bg"), bordercolor: token("--border"), borderwidth: 1 } },
     yaxis: { ...axisCommon, title: { text: `${quantity.name}${unit}`, font: { color: token("--muted") } },
              rangemode: quantity.zero ? "tozero" : "normal", tickformat: quantity.format.replace(/\.\d+f/, ".0f"),
-             ...(yrange ? { range: yrange } : {}) },
+             ...(yrange ? { range: yrange } : {}), ...yaxis },
+    ...(yaxis2 ? { yaxis2: { ...axisCommon, ...yaxis2, title: { ...yaxis2.title, font: { color: token("--muted") } } } } : {}),
     legend: { orientation: "h", x: 0, y: 1.02, yanchor: "bottom", font: { color: token("--text-secondary") } },
     showlegend: showLegend,
     shapes: shapes.filter((s) => s.type),
@@ -478,13 +495,6 @@ function statsRow(source, quantity, label, index) {
   const tile = (label, p) => `<div><dt>${label}</dt><dd>${fmt(p.value, quantity)}<small> ${esc(quantity.unit)}</small></dd><dd class="when">${day(p)}</dd></div>`;
   const head = label ? `<p class="stats-label"><span class="swatch ${index ? "other" : "main"}"></span>${esc(label)}</p>` : "";
   return `${head}<dl class="stats">${tile(source.forecast_run ? "Last forecast day" : "Last day", last)}${tile("Lowest", min)}${tile("Highest", max)}</dl>`;
-}
-
-function dataTable(traces, quantity) {
-  const rows = traces.filter((t) => t.meta?.table).flatMap((t) =>
-    t.x.map((x, i) => (t.y[i] == null ? "" : `<tr><td>${esc(t.name)}</td><td>${esc(t.meta.dates[i])}</td><td>${fmt(t.y[i], quantity)}</td></tr>`)));
-  return `<div class="table-wrap"><table><thead><tr><th>Series</th><th>Date</th><th>${esc(quantity.name)} (${esc(quantity.unit)})</th></tr></thead>
-    <tbody>${rows.join("")}</tbody></table></div>`;
 }
 
 // The selected plant's maximum downstream temperature, drawn on water temperature charts.
@@ -525,15 +535,42 @@ function timeTraces(s, q, plantName = null) {
     );
   }
   traces.push({
-    x, y: s.series.map((p) => p.value), mode: "lines", line: { color, width: 2, shape: "spline", smoothing: 0.4 },
+    x, y: s.series.map((p) => p.value), mode: "lines", line: { color, width: 2, shape: q.shape ?? "spline", smoothing: 0.4 },
     name: plantName ?? (hasRange ? "Ensemble median" : s.label),
     customdata: hasRange ? s.series.map((p) => [p.p10, p.p90]) : undefined,
     hovertemplate: hasRange
       ? `Median <b>%{y:${q.format}}</b>${unit}<br>Range %{customdata[0]:${q.format}}–%{customdata[1]:${q.format}}${unit}<extra></extra>`
       : `<b>%{y:${q.format}}</b>${unit}<extra></extra>`,
-    meta: { table: true, dates: x.map((t) => t.slice(0, 10)) },
   });
   return traces;
+}
+
+// Curtailment as MW to cut, with the share of the plant's capacity in the hover. The comparison
+// plant is a single dashed line, like compareTrace.
+function curtailmentTraces(s, q, plant, plantName = null, compare = false) {
+  const x = s.series.map((p) => p.time);
+  const capacity = plant.capacity_mw;
+  const color = token(compare ? "--series-compare" : q.color);
+  return [{
+    x, y: s.series.map((p) => p.value), mode: "lines+markers", name: plantName ?? s.label,
+    line: { color, width: 2, dash: compare ? "dash" : "solid" },
+    marker: { color, size: 7, line: { color: token("--surface"), width: 1.5 } },
+    ...(compare ? {} : { fill: "tozeroy", fillcolor: withAlpha(color, 0.15) }),
+    customdata: s.series.map((p) => (capacity ? (100 * p.value) / capacity : null)),
+    hovertemplate: `<b>%{y:${q.format}} ${q.unit}</b>${capacity ? " · %{customdata:.0f}% of capacity" : ""}<extra></extra>`,
+  }];
+}
+
+// Left axis in MW to cut, right axis in % of capacity, both from 0 to the plant's full capacity.
+function capacityAxes(capacity) {
+  if (!capacity) return {};
+  const steps = [0, 0.25, 0.5, 0.75, 1];
+  return {
+    yaxis: { title: { text: "MW to cut" }, range: [0, capacity], tickvals: steps.map((f) => f * capacity),
+             ticktext: steps.map((f) => Math.round(f * capacity).toLocaleString()) },
+    yaxis2: { title: { text: "% of capacity" }, overlaying: "y", side: "right", range: [0, 100], tickvals: steps.map((f) => f * 100),
+              ticksuffix: "%", showgrid: false, fixedrange: true },
+  };
 }
 
 // The comparison plant: one dashed line in its own colour, no ensemble band.
@@ -542,9 +579,8 @@ function compareTrace(s, q) {
   const unit = q.unit ? ` ${q.unit}` : "";
   return {
     x, y: s.series.map((p) => p.value), mode: "lines", name: state.compare.name,
-    line: { color: token("--series-compare"), width: 2, dash: "dash", shape: "spline", smoothing: 0.4 },
+    line: { color: token("--series-compare"), width: 2, dash: "dash", shape: q.shape ?? "spline", smoothing: 0.4 },
     hovertemplate: `<b>%{y:${q.format}}</b>${unit}<extra></extra>`,
-    meta: { table: true, dates: x.map((t) => t.slice(0, 10)) },
   };
 }
 
@@ -554,12 +590,12 @@ function dayOfYearTrace(s) {
   const years = [...new Set(s.series.map((p) => p.time.slice(0, 4)))];
   // Put every point on the leap year 2000 and break the line between years, so December
   // does not join up with the next January.
-  const x = [], y = [], dates = [];
+  const x = [], y = [];
   let prev = null;
   for (const p of s.series) {
     const md = p.time.slice(5, 10);
-    if (prev !== null && md < prev) { x.push(null); y.push(null); dates.push(""); }
-    x.push(`2000-${md}`); y.push(p.value); dates.push(p.time.slice(0, 10));
+    if (prev !== null && md < prev) { x.push(null); y.push(null); }
+    x.push(`2000-${md}`); y.push(p.value);
     prev = md;
   }
   const yearText = years.length > 3 ? `${years[0]}–${years[years.length - 1]}` : years.join(", ");
@@ -568,7 +604,6 @@ function dayOfYearTrace(s) {
     name: `${s.label} (${yearText})`,
     line: { color: token(style.color), width: 2, dash: style.dash },
     hovertemplate: `%{y:${q.format}} ${q.unit}<extra>${esc(s.label)}</extra>`,
-    meta: { table: true, dates },
   };
 }
 
