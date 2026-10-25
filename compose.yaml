@@ -4,6 +4,14 @@ services:
       context: .
       dockerfile: app/Dockerfile
     image: cooling-water-risk
+    develop:
+      watch:
+        - path: ./app
+          action: rebuild
+          ignore:
+            - "**/__pycache__/"
+            - "**/*.pyc"
+            - api/.env
     environment:
       APP_NAME: ${APP_NAME:-EIT-Water-Hackathon}
       APP_ENV: ${APP_ENV:-production}
