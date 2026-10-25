@@ -129,6 +129,10 @@ PROJECTION_YEARS = {"historical": range(1971, 2006), **{rcp: range(2006, 2101) f
 def download_projection(args):
     """Daily river discharge from one hydrological model / GCM / RCM chain, one file per experiment and year."""
     for experiment in args.experiment:
+        if args.periods:  # catchment model: multi-year files such as 1991_2000 (no year check needed)
+            for period in args.periods:
+                download_projection_year(args, experiment, period)
+            continue
         for year in args.years:
             if year not in PROJECTION_YEARS[experiment]:
                 span = PROJECTION_YEARS[experiment]
@@ -185,15 +189,20 @@ def main():
     p = sub.add_parser("projection", parents=[common], help="C3S climate projections (track 2)")
     p.add_argument("--experiment", nargs="+", default=["rcp_4_5"], choices=list(PROJECTION_YEARS),
                    help="one or more scenarios, e.g. rcp_2_6 rcp_4_5 rcp_8_5")
-    p.add_argument("--years", type=int, nargs="+", required=True,
-                   help="historical: 1971-2005, RCPs: 2006-2100")
-    p.add_argument("--hydrological-model", default="e_hypegrid", choices=["e_hypegrid", "vic_wur"])
+    p.add_argument("--years", type=int, nargs="+",
+                   help="historical: 1971-2005, RCPs: 2006-2100 (grid models)")
+    p.add_argument("--periods", nargs="+",
+                   help="multi-year files of the catchment model, e.g. 1991_2000 2001_2005 2041_2050")
+    p.add_argument("--hydrological-model", default="e_hypegrid", choices=["e_hypegrid", "e_hypecatch_m00", "vic_wur"],
+                   help="e_hypegrid: 5 km grid (default); e_hypecatch_m00: values per sub-catchment, much smaller")
     p.add_argument("--gcm", default="ec_earth", choices=["ec_earth", "hadgem2_es", "mpi_esm_lr"])
     p.add_argument("--rcm", default="rca4", choices=["rca4", "racmo22e", "cclm4_8_17", "csc_remo2009"])
     p.add_argument("--ensemble-member", default="r12i1p1", choices=["r1i1p1", "r2i1p1", "r12i1p1"])
     p.set_defaults(func=download_projection)
 
     args = parser.parse_args()
+    if args.track == "projection" and not (args.years or args.periods):
+        parser.error("projection needs --years (grid models) or --periods (catchment model)")
     args.func(args)
 
 

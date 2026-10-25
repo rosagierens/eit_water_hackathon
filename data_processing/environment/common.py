@@ -38,7 +38,7 @@ DISCHARGE = {
     "hydroland_ssp370": dict(source="hydroland", scenario="SSP3-7.0", track=2, label="HydroLand SSP3-7.0 (IFS-NEMO)",
                              files="interim/hydroland/SSP3-7.0/mrm/*_europe_daily.nc", var="Qrouted"),
     **{f"c3s_{exp}": dict(source="c3s_hydrology", scenario=exp, track=2, label=f"C3S E-HYPEgrid {label}",
-                          files=f"raw/c3s_hydrology/projection/*_{exp}_*.zip", var="rdis")
+                          files=f"raw/c3s_hydrology/projection/e_hypegrid_*_{exp}_*.zip", var="rdis")
        for exp, label in (("historical", "historical"), ("rcp_2_6", "RCP2.6"), ("rcp_4_5", "RCP4.5"),
                           ("rcp_8_5", "RCP8.5"))},
 }
