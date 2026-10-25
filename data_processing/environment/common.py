@@ -104,3 +104,17 @@ def load_plants():
         plants["water_type"] = None
     plants["water_type"] = plants["water_type"].fillna("unknown")  # no cooling data (e.g. Ukraine, Belarus)
     return plants[["location_id", "name", "lat", "lon", "water_type"]]
+
+
+def with_written_coords(ds):
+    """Coordinates as plain arrays without inherited chunk settings.
+
+    Used before writing a Zarr store with deferred (compute=False) data: the coordinates (e.g. 2-D lat/lon of
+    curvilinear grids) are then written right away, with a chunk layout Zarr chooses itself.
+    """
+    coords = {}
+    for name in ds.coords:
+        coord = ds[name].load().variable.copy()
+        coord.encoding = {}
+        coords[name] = coord
+    return ds.assign_coords(coords)

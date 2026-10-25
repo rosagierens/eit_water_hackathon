@@ -29,11 +29,11 @@ from scipy.spatial import cKDTree
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (AIR_TEMPERATURE, DISCHARGE, SPACE_CHUNK, TIME_CHUNK, WATER_TEMPERATURE, grid_store,
-                    horizontal_dims, lat_lon_2d, water_store)
+                    horizontal_dims, lat_lon_2d, water_store, with_written_coords)
 
 METHOD = "air2stream-4p-uncalibrated-v0"
 DEFAULT_PARAMS = dict(a1=5.0 / 3, a2=0.75 / 3, a3=1.0 / 3, a4=0.5)
-BLOCK_ROWS = 2 * SPACE_CHUNK  # rows of the discharge grid processed at once (multiple of the chunk size)
+BLOCK_ROWS = SPACE_CHUNK  # rows of the discharge grid processed at once (multiple of the chunk size)
 
 
 def _unit_vectors(lat, lon):
@@ -48,8 +48,9 @@ def nearest_index(src_ds, dst_ds):
 
 
 def model(q, ta, params=DEFAULT_PARAMS):
-    """Water temperature (time, cells) from discharge and air temperature (time, cells)."""
-    a1, a2, a3, a4 = (params[k] for k in ("a1", "a2", "a3", "a4"))
+    """Water temperature (time, cells) from discharge and air temperature (time, cells), in float32."""
+    a1, a2, a3, a4 = (np.float32(params[k]) for k in ("a1", "a2", "a3", "a4"))
+    q, ta = q.astype("float32", copy=False), ta.astype("float32", copy=False)
     with warnings.catch_warnings():  # cells without any discharge (sea, land) are all-NaN
         warnings.simplefilter("ignore", RuntimeWarning)
         q_mean = np.nanmean(q, axis=0)
@@ -81,9 +82,12 @@ def build(wt_id, pair):
         print(f"{wt_id}: discharge and air temperature share {len(days)} day(s), skipped")
         return None
     q = q_ds["discharge"].sel(time=days)
-    air = air_ds["air_temperature"].sel(time=days).load()
-    air_flat = air.values.reshape(len(days), -1)
-    index = nearest_index(air_ds, q_ds)
+    air = air_ds["air_temperature"].sel(time=days)
+    if "member" in air.dims:  # deterministic forecast stored as a one-member ensemble
+        air = air.isel(member=0, drop=True)
+    air_rows, air_cols = horizontal_dims(air)
+    n_air_cols = air.sizes[air_cols]
+    index = nearest_index(air_ds, q_ds)  # flat index into the air temperature grid
     rows, cols = horizontal_dims(q)
     has_member = "member" in q.dims
 
@@ -105,13 +109,18 @@ def build(wt_id, pair):
     chunks = {"time": min(TIME_CHUNK, len(days)), rows: SPACE_CHUNK, cols: SPACE_CHUNK}
     if has_member:
         chunks["member"] = 1
-    template.chunk(chunks).to_zarr(store, mode="w", zarr_format=2, compute=False, consolidated=True)
+    # Coordinates are made plain again after chunking, so they are written now and not deferred.
+    with_written_coords(template.chunk(chunks)).to_zarr(store, mode="w", zarr_format=2, compute=False,
+                                                         consolidated=True)
 
     for start in range(0, q.sizes[rows], BLOCK_ROWS):
         block = slice(start, min(start + BLOCK_ROWS, q.sizes[rows]))
         q_block = q.isel({rows: block}).load()
+        # Load only the air temperature rows this block needs, so long periods fit in memory.
         idx = index[block].ravel()
-        ta = air_flat[:, idx]
+        r_lo, r_hi = idx.min() // n_air_cols, idx.max() // n_air_cols + 1
+        air_block = air.isel({air_rows: slice(r_lo, r_hi)}).transpose("time", air_rows, air_cols).values
+        ta = air_block.reshape(len(days), -1)[:, idx - r_lo * n_air_cols]
         order = (["member"] if has_member else []) + ["time", rows, cols]
         qv_all = q_block.transpose(*order).values
         qv_all = qv_all if has_member else qv_all[None]
