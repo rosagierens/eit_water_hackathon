@@ -14,6 +14,8 @@ Licence and commercial-use status of every dataset in the project. Checked on 20
 | ECMWF open data (IFS HRES 2 m temperature) | Air temperature forecast | CC BY 4.0 | ✅ | Attribution to ECMWF |
 | ERA5-Land daily statistics (C3S, CDS) | Air temperature, past | CC BY 4.0 | ✅ | Attribution to C3S / ECMWF |
 | C3S hydrology projections (E-HYPEgrid, `sis-hydrology-variables-derived-projections`) | River discharge, scenarios | CC BY 4.0 | ✅ | Attribution to C3S |
+| C3S hydrology projections, catchment version (E-HYPEcatch, `e_hypecatch_m00`) | River discharge per sub-basin, scenarios | CC BY 4.0 (catalogue); the files themselves state "Copernicus License V1.2" | ✅ | Same dataset as the grid version. The Copernicus licence also allows commercial use with attribution |
+| E-HYPE sub-basins v3.0 (SMHI, Zenodo 581397) | Locating plants in the catchment discharge | CC BY-SA 4.0 | ✅ | **Share-alike:** distributed data derived from the map must use CC BY-SA 4.0 too. The app tables only contain discharge values, not the map. |
 | EURO-CORDEX ICHEC-EC-EARTH / SMHI-RCA4 (CDS) | Air temperature, scenarios | CORDEX terms of use; SMHI-RCA4 registered as **unrestricted** | ✅ | CORDEX lets each modelling group choose "unrestricted" or "non-commercial only"; SMHI-RCA4 is unrestricted in the official IS-ENES RCM list. **Other RCMs may be non-commercial: check before adding model chains.** |
 | DestinE HydroLand (Data Lake, `EO.UFZ.DAT.HYDROLAND`) | River discharge, scenarios | Labelled CC BY 4.0 in the Data Lake, **but** accessed under the *DestinE Terms and Conditions for upgraded access* | ⚠️ | See "DestinE" below |
 | DestinE Climate DT, IFS-NEMO 2 m temperature (Polytope) | Air temperature, scenarios | Same as HydroLand | ⚠️ | See "DestinE" below |

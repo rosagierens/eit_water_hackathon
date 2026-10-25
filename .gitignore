@@ -248,3 +248,5 @@ __marimo__/
 *.zarr
 
 eit_hackathon
+/data/raw/ehype_subbasins/*
+!/data/raw/ehype_subbasins/README.md

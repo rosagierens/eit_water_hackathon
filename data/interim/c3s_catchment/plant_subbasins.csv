@@ -1,0 +1,36 @@
+location_id,name,status,subid,distance_km,mean_discharge
+L100000500085,Astravets nuclear power plant,ok,9432930,0.0,105.2
+L100000500101,Doel nuclear power plant,ok,9508256,0.0,6.0
+L100000500099,Tihange nuclear power plant,ok,9503359,0.0,185.8
+L100000500097,Kozloduy nuclear power plant,ok,9621654,2.87,6763.9
+L100000500200,Dukovany nuclear power plant,ok,9606706,0.0,6.8
+L100000500096,Temelin nuclear power plant,ok,9001227,0.0,52.0
+L100000500035,Belleville nuclear power plant,ok,9506864,0.0,340.3
+L100000500136,Bugey nuclear power plant,ok,9705875,0.0,435.5
+L100000500038,Cattenom nuclear power plant,ok,9503147,0.0,121.4
+L100000500133,Chinon nuclear power plant,ok,9564161,0.0,477.9
+L100000500007,Chooz nuclear power plant,ok,9502884,0.0,117.5
+L100000500006,Civaux nuclear power plant,ok,9564021,0.0,78.8
+L100000500130,Cruas nuclear power plant,ok,9711596,0.0,1401.1
+L100000500137,Dampierre nuclear power plant,ok,9564971,0.0,345.6
+L100000500036,Golfech nuclear power plant,ok,9563848,0.0,262.9
+L100000500037,Nogent nuclear power plant,ok,9506596,0.0,67.6
+L100000500131,Saint-Laurent nuclear power plant,ok,9565148,0.0,354.4
+L100000500034,St. Alban nuclear power plant,ok,9708854,0.0,998.1
+L100000500132,Tricastin nuclear power plant,ok,9700109,6.02,1439.4
+L100000500197,Paks nuclear power plant,ok,9602268,0.0,2794.2
+L100000500162,Cernavodă nuclear power plant,ok,9602265,0.0,6960.1
+L100000500198,Bohunice nuclear power plant,ok,9000287,6.04,175.7
+L100000500199,Mochovce nuclear power plant,ok,9605421,0.53,56.8
+L100000500165,Krško nuclear power plant,ok,9604592,0.0,267.3
+L100000500113,Almaraz nuclear power plant,ok,9500779,0.0,19.8
+L100000500115,Ascó nuclear power plant,ok,9768415,0.0,390.9
+L100000500081,Cofrentes nuclear power plant,ok,9700432,0.0,21.6
+L100000500105,Trillo nuclear power plant,ok,9556537,0.0,16.3
+L100000500207,Beznau nuclear power plant,ok,9518241,0.0,524.1
+L100000500106,Goesgen nuclear power plant,ok,9518305,0.0,281.2
+L100000500051,Leibstadt nuclear power plant,ok,9517979,0.0,996.8
+L100000500095,Khmelnitski nuclear power plant,ok,9601254,0.0,17.2
+L100000500109,Rivne nuclear power plant,ok,9619493,0.0,64.6
+L100000500221,South Ukraine nuclear power plant,ok,9611615,0.0,140.8
+L100000500110,Zaporizhzhia nuclear power plant,ok,9600012,1.21,2548.9

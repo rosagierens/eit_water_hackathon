@@ -2,7 +2,8 @@
 
   python data_processing/environment/scenario_planning.py
 
-For every climate dataset with discharge + water temperature (currently C3S E-HYPEgrid + EURO-CORDEX):
+For every climate scenario with discharge + air temperature. Preferred source: the C3S catchment discharge
+(E-HYPEcatch, see catchments.py) + EURO-CORDEX at the plant; fallback: the gridded C3S sample (E-HYPEgrid).
   1. daily curtailment at each plant, with the same river cell and formula as the forecast
      (build_app_input.find_cell, build_curtailment.curtailment)
   2. monthly statistics per plant, scenario and calendar month, across the available years:
@@ -33,12 +34,13 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_app_input import find_cell, mean_discharge_map
 from build_curtailment import curtailment, plant_inputs
+from water_temperature import model as water_temperature_model
 from common import APP_INPUT, DISCHARGE, INTERIM, WATER_TEMPERATURE, grid_store, horizontal_dims, lat_lon_2d, \
     load_plants, water_store
 
 REDUCED_MONTH_PCT = 10.0
 EXTREME_DAY_PCT = 25.0
-REFERENCE = {"c3s_hydrology": "historical"}  # the model's own historical run, per source
+REFERENCE = {"c3s_hydrology": "historical", "c3s_catchment": "historical"}  # the model's own historical run
 
 
 def climate_pairs():
@@ -47,6 +49,44 @@ def climate_pairs():
         spec = DISCHARGE[pair["discharge"]]
         if spec["track"] == 2 and grid_store(pair["discharge"], spec).exists() and water_store(wt_id).exists():
             yield pair["discharge"], wt_id, spec
+
+
+def daily_curtailment_catchment():
+    """Daily curtailment from the catchment discharge (preferred: long periods at a small size), or None."""
+    import catchments
+
+    plants = load_plants()
+    series, assignment = catchments.plant_series(plants)
+    if not series:
+        return None
+    params = plant_inputs()
+    params = params[params["status"] == "ok"].set_index("location_id")
+    status = assignment.set_index("location_id")["status"]
+    frames = []
+    for scenario, item in series.items():
+        q, ta = item["q"], item["ta"]
+        if ta is None:
+            print(f"catchment {scenario}: no air temperature grid ({item['spec']['air']}), skipped")
+            continue
+        days = q.index.intersection(ta.index)
+        ids = [i for i in q.columns if i in params.index and i in ta.columns]
+        if len(days) < 2 or not ids:
+            print(f"catchment {scenario}: discharge and air temperature share {len(days)} day(s), skipped")
+            continue
+        qv, tv = q.loc[days, ids].to_numpy("float32"), ta.loc[days, ids].to_numpy("float32")
+        tw = water_temperature_model(qv, tv)  # same uncalibrated model as the gridded water temperature
+        for k, pid in enumerate(ids):
+            p = params.loc[pid]
+            frames.append(pd.DataFrame({"date": days, "q": qv[:, k], "t_river": tw[:, k]}).assign(
+                location_id=pid, dataset_id=f"curtailment_{scenario}", source="c3s_catchment", scenario=scenario,
+                river_cell_status=status[pid], p_el_mw=p.p_el_mw, q_river_cooling_mw=p.q_river_cooling_mw,
+                t_limit_c=p.t_limit_c, dt_limit_c=p.dt_limit_c))
+        print(f"catchment {scenario}: {len(ids)} plants, {len(days)} days ({days.min():%Y-%m-%d} .. {days.max():%Y-%m-%d})")
+    if not frames:
+        return None
+    daily = curtailment(pd.concat(frames, ignore_index=True))
+    daily["curtailed_pct"] = (1 - daily["available_fraction"]) * 100
+    return daily
 
 
 def daily_curtailment():
@@ -129,7 +169,10 @@ def monthly_statistics(daily):
 
 
 def main():
-    daily = daily_curtailment()
+    daily = daily_curtailment_catchment()
+    if daily is None:  # no catchment files yet: fall back to the gridded sample years
+        print("no catchment discharge found; using the gridded C3S sample")
+        daily = daily_curtailment()
     out_daily = INTERIM / "curtailment" / "scenario_daily.parquet"
     out_daily.parent.mkdir(parents=True, exist_ok=True)
     daily[["location_id", "date", "dataset_id", "source", "scenario", "value", "curtailed_pct", "available_fraction",

@@ -46,3 +46,18 @@ stats = xr.open_zarr("data/interim/water_temperature/statistics/rcp_4_5.zarr")["
 ## Scaling to full periods
 
 All steps rebuild from every file present, so downloading more years and rerunning `build_all.py` is enough. For decades of daily data, `build_grids.py` rechunks through dask. If memory becomes a limit, use the `rechunker` package for that step.
+
+## Scenario planning (draft): catchment discharge
+
+`scenario_planning.py` builds the planning statistics (`data/app_input/environment/scenario_monthly.parquet`) from the **C3S catchment discharge** (E-HYPEcatch, `e_hypecatch_m00`). It is about 27x smaller than the 5 km grid and comes in 10-year files. Without catchment files, it falls back to the gridded sample.
+
+- `catchments.py` places each plant in an E-HYPE sub-basin using `data/raw/ehype_subbasins/` (rule in its docstring). The result is written to `data/interim/c3s_catchment/plant_subbasins.csv`.
+- Air temperature comes from the nearest cell of the EURO-CORDEX grid of the same experiment, so run `build_grids.py cordex_historical cordex_rcp_4_5 cordex_rcp_8_5` first. Water temperature and curtailment use the same functions as the forecast.
+- Files that are not complete zips (downloads still running) are skipped with a message.
+- Cross-check for 2003: lost energy per plant from the catchment and grid versions correlates at 0.92, with similar totals.
+
+```bash
+python data_processing/environment/build_grids.py cordex_historical cordex_rcp_4_5 cordex_rcp_8_5
+python data_processing/environment/scenario_planning.py
+```
+

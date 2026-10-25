@@ -43,6 +43,17 @@ DISCHARGE = {
                           ("rcp_8_5", "RCP8.5"))},
 }
 
+# Catchment version of the C3S discharge: values per E-HYPE sub-basin (no grid), 10-year files, ~27x smaller.
+# Plants are located with the sub-basin map (SUBBASINS); see catchments.py.
+CATCHMENT = {
+    f"c3s_catchment_{exp}": dict(source="c3s_catchment", scenario=exp, track=2, label=f"C3S E-HYPEcatch {label}",
+                                 files=f"raw/c3s_hydrology/projection/e_hypecatch_m00_*_{exp}_*.zip", var="rdis",
+                                 air=f"cordex_{exp}")
+    for exp, label in (("historical", "historical"), ("rcp_2_6", "RCP2.6"), ("rcp_4_5", "RCP4.5"),
+                       ("rcp_8_5", "RCP8.5"))
+}
+SUBBASINS = RAW / "ehype_subbasins" / "SubbasinEHYPEv3pt0.zip"
+
 # Daily mean air temperature sources (only used to derive water temperature).
 AIR_TEMPERATURE = {
     "ecmwf_forecast": dict(source="ecmwf", scenario="forecast", track=1, label="ECMWF HRES forecast",
