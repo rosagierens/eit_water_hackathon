@@ -254,7 +254,7 @@ function coolingCard(plant) {
         ${item("❄", "Cooling type", plant.cooling_type ? esc(plant.cooling_type) : null, missing ? "no JRC cooling data" : "")}
         ${item("≈", "Cooling water", plant.water_type ? esc(plant.water_type) : null)}
         ${item("♨", "Heat to the river", heat, share)}
-        ${item("🌡", "Max temperature downstream", plant.temp_limit_c == null ? null : `${num(plant.temp_limit_c, 1)} °C`)}
+        ${item("🌡\uFE0F", "Max temperature downstream", plant.temp_limit_c == null ? null : `${num(plant.temp_limit_c, 1)} °C`)}
         ${item("↑", "Max warming of the river", plant.temp_change_limit_c == null ? null : `+${num(plant.temp_change_limit_c, 1)} °C`)}
         ${item("§", "Regulation level", plant.regulation_level ? esc(plant.regulation_level) : null,
           !plant.regulation_level || plant.regulation_level === "No limit found" ? "no regulation level data" : "")}
@@ -429,7 +429,7 @@ function badgeOf(s) {
   return "";
 }
 
-function addChart(parent, { title, badge, subtitle, source, quantity, traces, xaxis, yaxis = {}, yaxis2, yrange, shapes = [], stats = [] }) {
+function addChart(parent, { title, badge, subtitle, source, quantity, traces, xaxis, yaxis = {}, yaxis2, capacity, yrange, shapes = [], stats = [] }) {
   const block = document.createElement("section");
   block.className = `card accent-${quantity.key}`;
   const cell = source.cell
@@ -477,6 +477,23 @@ function addChart(parent, { title, badge, subtitle, source, quantity, traces, xa
     modeBarButtons: [["toImage", "resetScale2d"]],
     toImageButtonOptions: { filename: `${state.plant.name}_${source.source}`.replace(/\W+/g, "_") },
   });
+  if (yaxis2) {
+    // Zooming or resetting the MW axis moves the % axis with it.
+    let adjusting = false; // our own relayout below fires this event again
+    chartDiv.on("plotly_relayout", (ev) => {
+      if (adjusting) return;
+      const zoom = ev["yaxis.range"] || (ev["yaxis.range[0]"] !== undefined && [ev["yaxis.range[0]"], ev["yaxis.range[1]"]]);
+      if (!zoom && !ev["yaxis.autorange"]) return;
+      const r = zoom || [0, capacity];
+      const ticks = capacityTicks(r, capacity);
+      adjusting = true;
+      Plotly.relayout(chartDiv, {
+        "yaxis.range": r, "yaxis.tickvals": ticks.left.tickvals, "yaxis.ticktext": ticks.left.ticktext,
+        "yaxis2.range": r.map((v) => (100 * v) / capacity),
+        "yaxis2.tickvals": ticks.right.tickvals, "yaxis2.ticktext": ticks.right.ticktext,
+      }).finally(() => { adjusting = false; });
+    });
+  }
   const xs = traces.flatMap((t) => t.x).filter(Boolean).map((x) => chartDiv._fullLayout.xaxis.d2c(x));
   linkChart(chartDiv, [Math.min(...xs), Math.max(...xs)]);
 }
@@ -561,15 +578,29 @@ function curtailmentTraces(s, q, plant, plantName = null, compare = false) {
   }];
 }
 
+// Five evenly spaced ticks over the MW range `r`, with the matching % of capacity on the right axis,
+// so the right-hand ticks always sit on the left-hand gridlines, also after zooming.
+function capacityTicks(r, capacity) {
+  const mw = [0, 1, 2, 3, 4].map((i) => r[0] + (i * (r[1] - r[0])) / 4);
+  const text = (values, digits, suffix = "") =>
+    values.map((v) => v.toLocaleString(undefined, { maximumFractionDigits: digits }) + suffix);
+  const pct = mw.map((v) => (100 * v) / capacity);
+  return {
+    left: { tickvals: mw, ticktext: text(mw, r[1] - r[0] < 20 ? 1 : 0) },
+    right: { tickvals: pct, ticktext: text(pct, r[1] - r[0] < capacity / 10 ? 1 : 0, "%") },
+  };
+}
+
 // Left axis in MW to cut, right axis in % of capacity, both from 0 to the plant's full capacity.
+// addChart keeps the right axis in step with the left one when the chart is zoomed.
 function capacityAxes(capacity) {
   if (!capacity) return {};
-  const steps = [0, 0.25, 0.5, 0.75, 1];
+  const ticks = capacityTicks([0, capacity], capacity);
   return {
-    yaxis: { title: { text: "MW to cut" }, range: [0, capacity], tickvals: steps.map((f) => f * capacity),
-             ticktext: steps.map((f) => Math.round(f * capacity).toLocaleString()) },
-    yaxis2: { title: { text: "% of capacity" }, overlaying: "y", side: "right", range: [0, 100], tickvals: steps.map((f) => f * 100),
-              ticksuffix: "%", showgrid: false, fixedrange: true },
+    capacity,
+    yaxis: { title: { text: "MW to cut" }, range: [0, capacity], ...ticks.left },
+    yaxis2: { title: { text: "% of capacity" }, overlaying: "y", side: "right", range: [0, 100], ...ticks.right,
+              showgrid: false, fixedrange: true },
   };
 }
 
