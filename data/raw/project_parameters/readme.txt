@@ -44,7 +44,7 @@ a source still needs a row with tier "missing".
   model outfall limits, and plants with only an outfall limit get
   Temp_limits_status outfall_only (not covered).
 - valid_from, valid_to: period as MM-DD (may wrap past 12-31); both empty =
-  all year. facilities.csv takes the periods that cover 07-15. A plant may
+  all year. facilities.csv takes the periods that cover 10-25. A plant may
   have gaps between periods when the source defines no dates (Astravets).
 - averaging: how compliance is assessed (hourly, daily mean, ...).
 - compliance_point: where the limit applies (e.g. after full mixing).

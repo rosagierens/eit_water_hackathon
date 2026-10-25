@@ -99,9 +99,11 @@ ID, in GEM sheet order.
 
 The script stops if the limits table breaks its rules (see
 data/raw/project_parameters/readme.txt), names a Location_ID that is not a
-facility, has no period covering 07-15 for a facility, or has no row for a
-facility in the app input. Each limit value is taken from the most specific
-tier that sets it on 07-15.
+facility, or has no row for a facility in the app input. Each limit value is
+taken from the most specific tier that sets it on 10-25 (LIMIT_REFERENCE_DAY
+at the top of the script). A facility with no period covering that day keeps
+empty limits and the script prints its name (Astravets: the decree only gives
+summer and winter values).
 
 - Location_ID       <- GEM location ID
 - Name, Lat, Lon, Country <- first unit at the location (three plants have
@@ -117,11 +119,14 @@ tier that sets it on 07-15.
                     facilities_all.csv for facilities left out of the app
 - Temp_limit        highest downstream river temperature (°C), from
                     data/raw/project_parameters/temperature_limits.csv,
-                    for 07-15; empty if not set
+                    for 10-25; empty if not set
 - Temp_limit_tier   permit / national_rule of that value
 - Temp_change_limit highest warming of the river by the plant (°C), as above
 - Temp_change_limit_tier
 - Temp_limit_sources short citations of the values used, "; "-separated
+- valid_from, valid_to MM-DD period of the rows the two limit values come
+                    from; both empty = all year (or no limit). The script
+                    stops if the two values come from different periods
 - Water_type        Freshwater / Seawater, "Mixed" if units differ, empty if
                     any unit has none
 - Q_cool_MW_th      sum of Q_cool_MW_th over the units
