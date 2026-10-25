@@ -12,6 +12,7 @@ python data_processing/environment/build_all.py      # after new downloads; ~5 m
 | `water_temperature.py` | `data/interim/water_temperature/europe_daily/<scenario>.zarr` | `water_temperature` (°C) on each discharge grid |
 | `build_statistics.py` | `data/interim/<source>/statistics/<scenario>.zarr` | Monthly quantiles per grid cell (climate track, planning mode) |
 | `build_app_input.py` | `data/app_input/environment/` | Per-plant tables for the app (see the README there). Track 1 only by default; `--tracks 1 2` adds the climate scenarios and `plant_statistics.parquet` |
+| `build_curtailment.py` | `data/app_input/environment/curtailment.parquet` | Daily curtailment per plant (`methodology_cooling_constrain.md`), from the per-plant tables + `facilities.csv` |
 
 ## Grid conventions (all Zarr stores)
 
