@@ -117,12 +117,16 @@ summer and winter values).
                     outfall temperature is regulated; not covered by the
                     app), or missing (no source found); empty in
                     facilities_all.csv for facilities left out of the app
+- Regulation_level  display label for where the two limits below come from:
+                    "Plant permit", "National rule" or "Plant permit and
+                    national rule"; if neither is set on 10-25: "Seasonal
+                    limit, not in force", "Outfall limit only" or "No limit
+                    found" (by Temp_limits_status). Replaces the per-value
+                    tiers; temperature_limits.csv keeps them
 - Temp_limit        highest downstream river temperature (°C), from
                     data/raw/project_parameters/temperature_limits.csv,
                     for 10-25; empty if not set
-- Temp_limit_tier   permit / national_rule of that value
 - Temp_change_limit highest warming of the river by the plant (°C), as above
-- Temp_change_limit_tier
 - Temp_limit_sources short citations of the values used, "; "-separated
 - valid_from, valid_to MM-DD period of the rows the two limit values come
                     from; both empty = all year (or no limit). The script

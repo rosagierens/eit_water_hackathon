@@ -34,6 +34,20 @@ LIMIT_VALUES = {
 # Plants whose only regulated limit is the outfall temperature get Temp_limits_status "outfall_only".
 OUTFALL_COLUMN = "T_max_outfall_C"
 
+# Display labels for Regulation_level, which replaces the per-value tiers in facilities.csv.
+# Keyed by the set of tiers the two limit values come from.
+REGULATION_LEVELS = {
+    frozenset({"permit"}): "Plant permit",
+    frozenset({"national_rule"}): "National rule",
+    frozenset({"permit", "national_rule"}): "Plant permit and national rule",
+}
+# Labels for facilities with no river limit on LIMIT_REFERENCE_DAY, by Temp_limits_status.
+UNREGULATED_LEVELS = {
+    "sourced": "Seasonal limit, not in force",
+    "outfall_only": "Outfall limit only",
+    "missing": "No limit found",
+}
+
 FACILITY_COLUMNS = [
     "Location_ID",
     "Name",
@@ -45,10 +59,9 @@ FACILITY_COLUMNS = [
     "N_units",
     "Cooling_type",
     "Temp_limits_status",
+    "Regulation_level",
     "Temp_limit",
-    "Temp_limit_tier",
     "Temp_change_limit",
-    "Temp_change_limit_tier",
     "Temp_limit_sources",
     "valid_from",
     "valid_to",
@@ -150,6 +163,8 @@ def reference_limits(table: pd.DataFrame) -> pd.DataFrame:
     The script stops if the two values come from rows with different periods.
     Temp_limits_status is "sourced" if any period has a river limit, "outfall_only" if the sourced
     rows only limit the outfall temperature, and "missing" if no row is sourced.
+    Regulation_level is the display label for where the two values come from (REGULATION_LEVELS),
+    or why there are none (UNREGULATED_LEVELS).
     """
     sourced = table[table["tier"] != "missing"]
     river = set(
@@ -191,14 +206,18 @@ def reference_limits(table: pd.DataFrame) -> pd.DataFrame:
         )
         record = {"Location_ID": lid, "Temp_limits_status": status}
         used = []
+        tiers = set()
         periods = set()
         for column, name in LIMIT_VALUES.items():
             setting = rows[rows[column].notna()]
             record[name] = setting[column].iloc[0] if len(setting) else np.nan
-            record[f"{name}_tier"] = setting["tier"].iloc[0] if len(setting) else ""
             if len(setting):
                 used.append(setting["source"].iloc[0])
+                tiers.add(setting["tier"].iloc[0])
                 periods.add(tuple(setting[["valid_from", "valid_to"]].iloc[0].fillna("")))
+        record["Regulation_level"] = (
+            REGULATION_LEVELS[frozenset(tiers)] if tiers else UNREGULATED_LEVELS[status]
+        )
         if len(periods) > 1:
             sys.exit(
                 f"temperature_limits.csv: {lid}: the limits on {LIMIT_REFERENCE_DAY} come from"
@@ -220,11 +239,8 @@ def require_limits(facilities: pd.DataFrame) -> None:
         )
     print("Temperature limit status:")
     print(facilities["Temp_limits_status"].value_counts().to_string())
-    print("River temperature limits (facilities per tier of each value):")
-    tiers = facilities[[f"{name}_tier" for name in LIMIT_VALUES.values()]].replace(
-        "", "not set"
-    )
-    print(tiers.apply(pd.Series.value_counts).fillna(0).astype(int).to_string())
+    print("Regulation level:")
+    print(facilities["Regulation_level"].value_counts().to_string())
 
 
 def exclude_water_types(facilities: pd.DataFrame) -> pd.DataFrame:
