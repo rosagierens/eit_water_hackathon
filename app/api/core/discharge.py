@@ -28,12 +28,12 @@ UNRELIABLE_CELLS = {"small_stream": "No real river near this plant in the model,
 # Track 1 = operations (next days), track 2 = planning (scenarios).
 # `dataset` is the dataset_id in the tables; `pair` groups the datasets whose dates are aligned.
 SOURCES = {
+    "Curtailment": {"track": 1, "label": "Derived from plant specific properties, river discharge and water temperature",
+                    "dataset": "curtailment_forecast", "variable": "curtailment", "pair": "forecast"},
     "River_discharge": {"track": 1, "label": "GloFAS river discharge", "dataset": "glofas_forecast",
                         "variable": "discharge", "pair": "forecast"},
-    "River_temperature": {"track": 1, "label": "Water temperature from GloFAS forecast", "dataset": "wt_forecast",
+    "River_temperature": {"track": 1, "label": "Modelled using ECMWF 2m temperature and river discharge", "dataset": "wt_forecast",
                           "variable": "water_temperature", "pair": "forecast"},
-    "Curtailment": {"track": 1, "label": "Curtailment from GloFAS forecast and water temperature",
-                    "dataset": "curtailment_forecast", "variable": "curtailment", "pair": "forecast"},
     # "glofas_reanalysis": {"track": 1, "label": "GloFAS reanalysis (ERA5)", "variable": "discharge", "pair": "reanalysis"},
     # "wt_reanalysis": {"track": 1, "label": "Water temperature from GloFAS reanalysis + ERA5-Land",
     #                   "variable": "water_temperature", "pair": "reanalysis"},
