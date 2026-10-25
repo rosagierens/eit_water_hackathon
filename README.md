@@ -31,6 +31,12 @@ python data_processing/plants/run_pipeline.py
 python -m app --reload
 ```
 
+or using Docker/Podman:
+
+```bash
+Docker compose up --build
+```
+
 `run_pipeline.py` runs the four plant scripts in order and rebuilds
 `data/app_input/facilities.csv` from the raw GEM and JRC files; skip it if the
 committed file is current. See
