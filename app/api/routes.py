@@ -1,6 +1,6 @@
 from fastapi import HTTPException, APIRouter
 
-from .core import discharge, plants
+from api.core import discharge, plants
 
 router = APIRouter()
 
@@ -17,21 +17,19 @@ def list_sources():
 @router.get("/api/plants/{id}/discharge", responses={404: {"description": "Unkown plant"}})
 def plant_discharge(id: str, track: int | None = None):
     """Power plant discharge 
-
+ 
     Args:
         id: The plant id
         track: Future or current
-
+ 
     Returns:
         dict of the plants
     """
     plant = plants.get_plant(id)
     if plant is None:
         raise HTTPException(status_code=404, detail=f"Unknown plant {id}")
-    keys = [k for k, s in discharge.SOURCES.items() if track is None or s["track"] == track]
-
+ 
     return {
         "plant": plant,
-        "sources": [discharge.plant_series(k, plant["lat"], plant["lon"]) for k in keys],
+        "sources": discharge.plant_sources(plant["id"], track),
     }
-    # return dict(plant=plant, sources=[discharge.plant_series(k, plant["lat"], plant["lon"]) for k in keys])

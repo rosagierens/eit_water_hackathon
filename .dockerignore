@@ -1,0 +1,6 @@
+*
+!app/
+!data/app_input/
+app/**/__pycache__
+app/**/*.pyc
+app/api/.env

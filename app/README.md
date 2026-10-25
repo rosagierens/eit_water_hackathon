@@ -13,6 +13,8 @@ the discharge reader still uses the former download path (see Known limits).
 python -m app --reload                            # from the repo root; --port N to change the port
 ```
 
+To run it in Docker instead, see `DOCKER_README.md` (`docker compose up --build` from the repo root).
+
 To rebuild `data/app_input/facilities.csv`, run the four scripts in
 `data_processing/plants/` listed in its `readme.txt` first.
 

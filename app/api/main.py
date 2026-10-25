@@ -9,8 +9,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from .routes import router
-from .logger import setup_logging
+from api.routes import router
+from api.logger import setup_logging
 
 setup_logging()
 
