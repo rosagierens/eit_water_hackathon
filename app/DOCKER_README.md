@@ -81,6 +81,7 @@ The settings that `app/api/.env` holds for local runs are set as environment var
 | `FACILITIES_CSV` | `data/app_input/facilities.csv` | Plant table |
 | `RAW_DISCHARGE_DATA` | `data/app_input/environment/discharge.parquet` | River discharge table |
 | `WATER_TEMPERATURE_DATA` | `data/app_input/environment/water_temperature.parquet` | Water temperature table |
+| `CURTAILMENT_DATA` | `data/app_input/environment/curtailment.parquet` | Curtailment table |
 
 Paths are relative to the repository root, which is `/srv` in the container. Example:
 

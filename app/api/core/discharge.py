@@ -1,12 +1,13 @@
-"""River discharge and water temperature at a plant, read from the application-ready parquet tables.
+"""River discharge, water temperature and curtailment at a plant, read from the application-ready parquet tables.
 
-Both tables have one row per (dataset, plant, date) and, for ensemble forecasts, one row per
+All tables have one row per (dataset, plant, date) and, for ensemble forecasts, one row per
 member and forecast run. Columns: location_id, date, dataset_id, source, scenario, track,
 member, forecast_run, value.
 
 Forecasts are shown from FORECAST_DAYS_BACK days before today to the last forecast day.
 Each day takes the newest forecast run that covers it, and discharge and water temperature
 of the same pair use the same run and the same dates, so the charts line up day by day.
+Curtailment is computed from that discharge and water temperature, so it joins the same pair.
 """
 
 from functools import lru_cache
@@ -17,9 +18,12 @@ from api.helper import get_path
 TABLES = {
     "discharge": get_path("RAW_DISCHARGE_DATA"),
     "water_temperature": get_path("WATER_TEMPERATURE_DATA"),
+    "curtailment": get_path("CURTAILMENT_DATA"),
 }
 FORECAST_DAYS_BACK = 2
-UNITS = {"discharge": "m3 s-1", "water_temperature": "degC"}
+UNITS = {"discharge": "m3 s-1", "water_temperature": "degC", "curtailment": "MW"}
+# River cells whose curtailment is not meaningful (see data/app_input/environment/README.md).
+UNRELIABLE_CELLS = {"small_stream": "No real river near this plant in the model, so the curtailment is not meaningful."}
 
 # Track 1 = operations (next days), track 2 = planning (scenarios).
 # `dataset` is the dataset_id in the tables; `pair` groups the datasets whose dates are aligned.
@@ -28,6 +32,8 @@ SOURCES = {
                         "variable": "discharge", "pair": "forecast"},
     "River_temperature": {"track": 1, "label": "Water temperature from GloFAS forecast", "dataset": "wt_forecast",
                           "variable": "water_temperature", "pair": "forecast"},
+    "Curtailment": {"track": 1, "label": "Curtailment from GloFAS forecast and water temperature",
+                    "dataset": "curtailment_forecast", "variable": "curtailment", "pair": "forecast"},
     # "glofas_reanalysis": {"track": 1, "label": "GloFAS reanalysis (ERA5)", "variable": "discharge", "pair": "reanalysis"},
     # "wt_reanalysis": {"track": 1, "label": "Water temperature from GloFAS reanalysis + ERA5-Land",
     #                   "variable": "water_temperature", "pair": "reanalysis"},
@@ -44,7 +50,10 @@ SOURCES = {
 @lru_cache(maxsize=None)
 def _table(variable):
     """One whole table, read once."""
-    df = pd.read_parquet(TABLES[variable], columns=["location_id", "date", "dataset_id", "track", "member", "forecast_run", "value"])
+    columns = ["location_id", "date", "dataset_id", "track", "member", "forecast_run", "value"]
+    if variable == "curtailment":
+        columns.append("river_cell_status")
+    df = pd.read_parquet(TABLES[variable], columns=columns)
     df["location_id"] = df["location_id"].astype(str)
     df["date"] = pd.to_datetime(df["date"])
     return df
@@ -124,9 +133,13 @@ def _series(source, frame):
         result["message"] = "No data for this plant in this source"
         return result
 
+    status = frame["river_cell_status"].iloc[0] if "river_cell_status" in frame else None
+    if status in UNRELIABLE_CELLS:
+        result["warning"] = UNRELIABLE_CELLS[status]
+
     runs = frame["forecast_run"].dropna()
     if len(runs):
-        result["forecast_run"] = str(pd.Timestamp(runs.max()).date())  # newest run used
+        result["forecast_run"] = str(pd.Timestamp(runs.max()).date())
 
     for date, row in _points(frame).iterrows():
         point = {"time": date.isoformat(), "value": float(row["value"])}

@@ -10,6 +10,7 @@ services:
       FACILITIES_CSV: ${FACILITIES_CSV:-data/app_input/facilities.csv}
       RAW_DISCHARGE_DATA: ${RAW_DISCHARGE_DATA:-data/app_input/environment/discharge.parquet}
       WATER_TEMPERATURE_DATA: ${WATER_TEMPERATURE_DATA:-data/app_input/environment/water_temperature.parquet}
+      CURTAILMENT_DATA: ${CURTAILMENT_DATA:-data/app_input/environment/curtailment.parquet}
     ports:
       - "${APP_PORT:-8050}:8050"
     volumes:
